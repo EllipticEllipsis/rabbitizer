@@ -1,0 +1,539 @@
+---
+Gpr_o32:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: zero, numeric:  0, isZero: true }
+    - { name: at,   numeric:  1, isClobberedByFuncCall: true, isAt: true }
+    - { name: v0,   numeric:  2, isClobberedByFuncCall: true, isReturnReg: true }
+    - { name: v1,   numeric:  3, isClobberedByFuncCall: true, isReturnReg: true }
+    - { name: a0,   numeric:  4, isClobberedByFuncCall: true, isArg: true }
+    - { name: a1,   numeric:  5, isClobberedByFuncCall: true, isArg: true }
+    - { name: a2,   numeric:  6, isClobberedByFuncCall: true, isArg: true }
+    - { name: a3,   numeric:  7, isClobberedByFuncCall: true, isArg: true }
+    - { name: t0,   numeric:  8, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t1,   numeric:  9, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t2,   numeric: 10, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t3,   numeric: 11, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t4,   numeric: 12, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t5,   numeric: 13, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t6,   numeric: 14, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t7,   numeric: 15, isClobberedByFuncCall: true, isTemp: true }
+    - { name: s0,   numeric: 16, isSaved: true }
+    - { name: s1,   numeric: 17, isSaved: true }
+    - { name: s2,   numeric: 18, isSaved: true }
+    - { name: s3,   numeric: 19, isSaved: true }
+    - { name: s4,   numeric: 20, isSaved: true }
+    - { name: s5,   numeric: 21, isSaved: true }
+    - { name: s6,   numeric: 22, isSaved: true }
+    - { name: s7,   numeric: 23, isSaved: true }
+    - { name: t8,   numeric: 24, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t9,   numeric: 25, isClobberedByFuncCall: true, isTemp: true }
+    - { name: k0,   numeric: 26, isKernel: true }
+    - { name: k1,   numeric: 27, isKernel: true }
+    - { name: gp,   numeric: 28, isGp: true }
+    - { name: sp,   numeric: 29, isStackPointer: true }
+    - { name: fp,   numeric: 30 }
+    - { name: ra,   numeric: 31, isClobberedByFuncCall: true, isRa: true }
+
+Gpr_n32:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: zero, numeric:  0, isZero: true }
+    - { name: at,   numeric:  1, isClobberedByFuncCall: true, isAt: true }
+    - { name: v0,   numeric:  2, isClobberedByFuncCall: true, isReturnReg: true }
+    - { name: v1,   numeric:  3, isClobberedByFuncCall: true, isReturnReg: true }
+    - { name: a0,   numeric:  4, isClobberedByFuncCall: true, isArg: true }
+    - { name: a1,   numeric:  5, isClobberedByFuncCall: true, isArg: true }
+    - { name: a2,   numeric:  6, isClobberedByFuncCall: true, isArg: true }
+    - { name: a3,   numeric:  7, isClobberedByFuncCall: true, isArg: true }
+    - { name: a4,   numeric:  8, isClobberedByFuncCall: true, isArg: true }
+    - { name: a5,   numeric:  9, isClobberedByFuncCall: true, isArg: true }
+    - { name: a6,   numeric: 10, isClobberedByFuncCall: true, isArg: true }
+    - { name: a7,   numeric: 11, isClobberedByFuncCall: true, isArg: true }
+    - { name: t0,   numeric: 12, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t1,   numeric: 13, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t2,   numeric: 14, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t3,   numeric: 15, isClobberedByFuncCall: true, isTemp: true }
+    - { name: s0,   numeric: 16, isSaved: true }
+    - { name: s1,   numeric: 17, isSaved: true }
+    - { name: s2,   numeric: 18, isSaved: true }
+    - { name: s3,   numeric: 19, isSaved: true }
+    - { name: s4,   numeric: 20, isSaved: true }
+    - { name: s5,   numeric: 21, isSaved: true }
+    - { name: s6,   numeric: 22, isSaved: true }
+    - { name: s7,   numeric: 23, isSaved: true }
+    - { name: t8,   numeric: 24, isClobberedByFuncCall: true, isTemp: true }
+    - { name: t9,   numeric: 25, isClobberedByFuncCall: true, isTemp: true }
+    - { name: k0,   numeric: 26, isKernel: true }
+    - { name: k1,   numeric: 27, isKernel: true }
+    - { name: gp,   numeric: 28, isGp: true }
+    - { name: sp,   numeric: 29, isStackPointer: true }
+    - { name: fp,   numeric: 30 }
+    - { name: ra,   numeric: 31, isClobberedByFuncCall: true, isRa: true }
+
+Cop0:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: Index,      numeric:  0 }
+    - { name: Random,     numeric:  1 }
+    - { name: EntryLo0,   numeric:  2 }
+    - { name: EntryLo1,   numeric:  3 }
+    - { name: Context,    numeric:  4 }
+    - { name: PageMask,   numeric:  5 }
+    - { name: Wired,      numeric:  6 }
+    - { name: Reserved07, numeric:  7, isReserved: true }
+    - { name: BadVaddr,   numeric:  8 }
+    - { name: Count,      numeric:  9 }
+    - { name: EntryHi,    numeric: 10 }
+    - { name: Compare,    numeric: 11 }
+    - { name: Status,     numeric: 12 }
+    - { name: Cause,      numeric: 13 }
+    - { name: EPC,        numeric: 14 }
+    - { name: PRevID,     numeric: 15 }
+    - { name: Config,     numeric: 16 }
+    - { name: LLAddr,     numeric: 17 }
+    - { name: WatchLo,    numeric: 18 }
+    - { name: WatchHi,    numeric: 19 }
+    - { name: XContext,   numeric: 20 }
+    - { name: Reserved21, numeric: 21, isReserved: true }
+    - { name: Reserved22, numeric: 22, isReserved: true }
+    - { name: Reserved23, numeric: 23, isReserved: true }
+    - { name: Reserved24, numeric: 24, isReserved: true }
+    - { name: Reserved25, numeric: 25, isReserved: true }
+    - { name: PErr,       numeric: 26 }
+    - { name: CacheErr,   numeric: 27 }
+    - { name: TagLo,      numeric: 28 }
+    - { name: TagHi,      numeric: 29 }
+    - { name: ErrorEPC,   numeric: 30 }
+    - { name: Reserved31, numeric: 31, isReserved: true }
+
+Cop1_o32:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: fv0,  numeric:  f0 }
+    - { name: fv0f, numeric:  f1 }
+    - { name: fv1,  numeric:  f2 }
+    - { name: fv1f, numeric:  f3 }
+    - { name: ft0,  numeric:  f4 }
+    - { name: ft0f, numeric:  f5 }
+    - { name: ft1,  numeric:  f6 }
+    - { name: ft1f, numeric:  f7 }
+    - { name: ft2,  numeric:  f8 }
+    - { name: ft2f, numeric:  f9 }
+    - { name: ft3,  numeric: f10 }
+    - { name: ft3f, numeric: f11 }
+    - { name: fa0,  numeric: f12 }
+    - { name: fa0f, numeric: f13 }
+    - { name: fa1,  numeric: f14 }
+    - { name: fa1f, numeric: f15 }
+    - { name: ft4,  numeric: f16 }
+    - { name: ft4f, numeric: f17 }
+    - { name: ft5,  numeric: f18 }
+    - { name: ft5f, numeric: f19 }
+    - { name: fs0,  numeric: f20 }
+    - { name: fs0f, numeric: f21 }
+    - { name: fs1,  numeric: f22 }
+    - { name: fs1f, numeric: f23 }
+    - { name: fs2,  numeric: f24 }
+    - { name: fs2f, numeric: f25 }
+    - { name: fs3,  numeric: f26 }
+    - { name: fs3f, numeric: f27 }
+    - { name: fs4,  numeric: f28 }
+    - { name: fs4f, numeric: f29 }
+    - { name: fs5,  numeric: f30 }
+    - { name: fs5f, numeric: f31 }
+
+Cop1_n32:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: fv0,  numeric:  f0 }
+    - { name: ft14, numeric:  f1 }
+    - { name: fv1,  numeric:  f2 }
+    - { name: ft15, numeric:  f3 }
+    - { name: ft0,  numeric:  f4 }
+    - { name: ft1,  numeric:  f5 }
+    - { name: ft2,  numeric:  f6 }
+    - { name: ft3,  numeric:  f7 }
+    - { name: ft4,  numeric:  f8 }
+    - { name: ft5,  numeric:  f9 }
+    - { name: ft6,  numeric: f10 }
+    - { name: ft7,  numeric: f11 }
+    - { name: fa0,  numeric: f12 }
+    - { name: fa1,  numeric: f13 }
+    - { name: fa2,  numeric: f14 }
+    - { name: fa3,  numeric: f15 }
+    - { name: fa4,  numeric: f16 }
+    - { name: fa5,  numeric: f17 }
+    - { name: fa6,  numeric: f18 }
+    - { name: fa7,  numeric: f19 }
+    - { name: fs0,  numeric: f20 }
+    - { name: ft8,  numeric: f21 }
+    - { name: fs1,  numeric: f22 }
+    - { name: ft9,  numeric: f23 }
+    - { name: fs2,  numeric: f24 }
+    - { name: ft10, numeric: f25 }
+    - { name: fs3,  numeric: f26 }
+    - { name: ft11, numeric: f27 }
+    - { name: fs4,  numeric: f28 }
+    - { name: ft12, numeric: f29 }
+    - { name: fs5,  numeric: f30 }
+    - { name: ft13, numeric: f31 }
+
+Cop1_n64:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: fv0,  numeric:  f0 }
+    - { name: ft12, numeric:  f1 }
+    - { name: fv1,  numeric:  f2 }
+    - { name: ft13, numeric:  f3 }
+    - { name: ft0,  numeric:  f4 }
+    - { name: ft1,  numeric:  f5 }
+    - { name: ft2,  numeric:  f6 }
+    - { name: ft3,  numeric:  f7 }
+    - { name: ft4,  numeric:  f8 }
+    - { name: ft5,  numeric:  f9 }
+    - { name: ft6,  numeric: f10 }
+    - { name: ft7,  numeric: f11 }
+    - { name: fa0,  numeric: f12 }
+    - { name: fa1,  numeric: f13 }
+    - { name: fa2,  numeric: f14 }
+    - { name: fa3,  numeric: f15 }
+    - { name: fa4,  numeric: f16 }
+    - { name: fa5,  numeric: f17 }
+    - { name: fa6,  numeric: f18 }
+    - { name: fa7,  numeric: f19 }
+    - { name: ft8,  numeric: f20 }
+    - { name: ft9,  numeric: f21 }
+    - { name: ft10, numeric: f22 }
+    - { name: ft11, numeric: f23 }
+    - { name: fs0,  numeric: f24 }
+    - { name: fs1,  numeric: f25 }
+    - { name: fs2,  numeric: f26 }
+    - { name: fs3,  numeric: f27 }
+    - { name: fs4,  numeric: f28 }
+    - { name: fs5,  numeric: f29 }
+    - { name: fs6,  numeric: f30 }
+    - { name: fs7,  numeric: f31 }
+
+Cop1_control:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name:  0,     numeric:  0 }
+    - { name:  1,     numeric:  1 }
+    - { name:  2,     numeric:  2 }
+    - { name:  3,     numeric:  3 }
+    - { name:  4,     numeric:  4 }
+    - { name:  5,     numeric:  5 }
+    - { name:  6,     numeric:  6 }
+    - { name:  7,     numeric:  7 }
+    - { name:  8,     numeric:  8 }
+    - { name:  9,     numeric:  9 }
+    - { name: 10,     numeric: 10 }
+    - { name: 11,     numeric: 11 }
+    - { name: 12,     numeric: 12 }
+    - { name: 13,     numeric: 13 }
+    - { name: 14,     numeric: 14 }
+    - { name: 15,     numeric: 15 }
+    - { name: 16,     numeric: 16 }
+    - { name: 17,     numeric: 17 }
+    - { name: 18,     numeric: 18 }
+    - { name: 19,     numeric: 19 }
+    - { name: 20,     numeric: 20 }
+    - { name: 21,     numeric: 21 }
+    - { name: 22,     numeric: 22 }
+    - { name: 23,     numeric: 23 }
+    - { name: 24,     numeric: 24 }
+    - { name: 25,     numeric: 25 }
+    - { name: 26,     numeric: 26 }
+    - { name: 27,     numeric: 27 }
+    - { name: 28,     numeric: 28 }
+    - { name: 29,     numeric: 29 }
+    - { name: 30,     numeric: 30 }
+    - { name: FpcCsr, numeric: 31 }
+
+Cop2:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: 0,  numeric:  0 }
+    - { name: 1,  numeric:  1 }
+    - { name: 2,  numeric:  2 }
+    - { name: 3,  numeric:  3 }
+    - { name: 4,  numeric:  4 }
+    - { name: 5,  numeric:  5 }
+    - { name: 6,  numeric:  6 }
+    - { name: 7,  numeric:  7 }
+    - { name: 8,  numeric:  8 }
+    - { name: 9,  numeric:  9 }
+    - { name: 10, numeric: 10 }
+    - { name: 11, numeric: 11 }
+    - { name: 12, numeric: 12 }
+    - { name: 13, numeric: 13 }
+    - { name: 14, numeric: 14 }
+    - { name: 15, numeric: 15 }
+    - { name: 16, numeric: 16 }
+    - { name: 17, numeric: 17 }
+    - { name: 18, numeric: 18 }
+    - { name: 19, numeric: 19 }
+    - { name: 20, numeric: 20 }
+    - { name: 21, numeric: 21 }
+    - { name: 22, numeric: 22 }
+    - { name: 23, numeric: 23 }
+    - { name: 24, numeric: 24 }
+    - { name: 25, numeric: 25 }
+    - { name: 26, numeric: 26 }
+    - { name: 27, numeric: 27 }
+    - { name: 28, numeric: 28 }
+    - { name: 29, numeric: 29 }
+    - { name: 30, numeric: 30 }
+    - { name: 31, numeric: 31 }
+
+Rsp_gpr:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: zero, numeric:  0, isZero: true }
+    - { name: 1,    numeric:  1 }
+    - { name: 2,    numeric:  2 }
+    - { name: 3,    numeric:  3 }
+    - { name: 4,    numeric:  4 }
+    - { name: 5,    numeric:  5 }
+    - { name: 6,    numeric:  6 }
+    - { name: 7,    numeric:  7 }
+    - { name: 8,    numeric:  8 }
+    - { name: 9,    numeric:  9 }
+    - { name: 10,   numeric: 10 }
+    - { name: 11,   numeric: 11 }
+    - { name: 12,   numeric: 12 }
+    - { name: 13,   numeric: 13 }
+    - { name: 14,   numeric: 14 }
+    - { name: 15,   numeric: 15 }
+    - { name: 16,   numeric: 16 }
+    - { name: 17,   numeric: 17 }
+    - { name: 18,   numeric: 18 }
+    - { name: 19,   numeric: 19 }
+    - { name: 20,   numeric: 20 }
+    - { name: 21,   numeric: 21 }
+    - { name: 22,   numeric: 22 }
+    - { name: 23,   numeric: 23 }
+    - { name: 24,   numeric: 24 }
+    - { name: 25,   numeric: 25 }
+    - { name: 26,   numeric: 26 }
+    - { name: 27,   numeric: 27 }
+    - { name: 28,   numeric: 28 }
+    - { name: 29,   numeric: 29 }
+    - { name: 30,   numeric: 30 }
+    - { name: ra,   numeric: 31, isClobberedByFuncCall: true, isRa: true }
+
+Rsp_cop0:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: ADDR,      numeric:  0 }
+    - { name: ADDR,      numeric:  1 }
+    - { name: LEN,       numeric:  2 }
+    - { name: LEN,       numeric:  3 }
+    - { name: STATUS,    numeric:  4 }
+    - { name: FULL,      numeric:  5 }
+    - { name: BUSY,      numeric:  6 }
+    - { name: SEMAPHORE, numeric:  7 }
+    - { name: START,     numeric:  8 }
+    - { name: END,       numeric:  9 }
+    - { name: CURRENT,   numeric: 10 }
+    - { name: STATUS,    numeric: 11 }
+    - { name: CLOCK,     numeric: 12 }
+    - { name: BUFBUSY,   numeric: 13 }
+    - { name: PIPEBUSY,  numeric: 14 }
+    - { name: TMEM,      numeric: 15 }
+
+Rsp_cop2:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name:  0, numeric:  0 }
+    - { name:  1, numeric:  1 }
+    - { name:  2, numeric:  2 }
+    - { name:  3, numeric:  3 }
+    - { name:  4, numeric:  4 }
+    - { name:  5, numeric:  5 }
+    - { name:  6, numeric:  6 }
+    - { name:  7, numeric:  7 }
+    - { name:  8, numeric:  8 }
+    - { name:  9, numeric:  9 }
+    - { name: 10, numeric: 10 }
+    - { name: 11, numeric: 11 }
+    - { name: 12, numeric: 12 }
+    - { name: 13, numeric: 13 }
+    - { name: 14, numeric: 14 }
+    - { name: 15, numeric: 15 }
+    - { name: 16, numeric: 16 }
+    - { name: 17, numeric: 17 }
+    - { name: 18, numeric: 18 }
+    - { name: 19, numeric: 19 }
+    - { name: 20, numeric: 20 }
+    - { name: 21, numeric: 21 }
+    - { name: 22, numeric: 22 }
+    - { name: 23, numeric: 23 }
+    - { name: 24, numeric: 24 }
+    - { name: 25, numeric: 25 }
+    - { name: 26, numeric: 26 }
+    - { name: 27, numeric: 27 }
+    - { name: 28, numeric: 28 }
+    - { name: 29, numeric: 29 }
+    - { name: 30, numeric: 30 }
+    - { name: 31, numeric: 31 }
+
+Rsp_cop2_control:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name:  0, numeric:  0 }
+    - { name:  1, numeric:  1 }
+    - { name:  2, numeric:  2 }
+    - { name:  3, numeric:  3 }
+    - { name:  4, numeric:  4 }
+    - { name:  5, numeric:  5 }
+    - { name:  6, numeric:  6 }
+    - { name:  7, numeric:  7 }
+    - { name:  8, numeric:  8 }
+    - { name:  9, numeric:  9 }
+    - { name: 10, numeric: 10 }
+    - { name: 11, numeric: 11 }
+    - { name: 12, numeric: 12 }
+    - { name: 13, numeric: 13 }
+    - { name: 14, numeric: 14 }
+    - { name: 15, numeric: 15 }
+    - { name: 16, numeric: 16 }
+    - { name: 17, numeric: 17 }
+    - { name: 18, numeric: 18 }
+    - { name: 19, numeric: 19 }
+    - { name: 20, numeric: 20 }
+    - { name: 21, numeric: 21 }
+    - { name: 22, numeric: 22 }
+    - { name: 23, numeric: 23 }
+    - { name: 24, numeric: 24 }
+    - { name: 25, numeric: 25 }
+    - { name: 26, numeric: 26 }
+    - { name: 27, numeric: 27 }
+    - { name: 28, numeric: 28 }
+    - { name: 29, numeric: 29 }
+    - { name: 30, numeric: 30 }
+    - { name: 31, numeric: 31 }
+
+Rsp_vector:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: v0,  numeric:  0 }
+    - { name: v1,  numeric:  1 }
+    - { name: v2,  numeric:  2 }
+    - { name: v3,  numeric:  3 }
+    - { name: v4,  numeric:  4 }
+    - { name: v5,  numeric:  5 }
+    - { name: v6,  numeric:  6 }
+    - { name: v7,  numeric:  7 }
+    - { name: v8,  numeric:  8 }
+    - { name: v9,  numeric:  9 }
+    - { name: v10, numeric: 10 }
+    - { name: v11, numeric: 11 }
+    - { name: v12, numeric: 12 }
+    - { name: v13, numeric: 13 }
+    - { name: v14, numeric: 14 }
+    - { name: v15, numeric: 15 }
+    - { name: v16, numeric: 16 }
+    - { name: v17, numeric: 17 }
+    - { name: v18, numeric: 18 }
+    - { name: v19, numeric: 19 }
+    - { name: v20, numeric: 20 }
+    - { name: v21, numeric: 21 }
+    - { name: v22, numeric: 22 }
+    - { name: v23, numeric: 23 }
+    - { name: v24, numeric: 24 }
+    - { name: v25, numeric: 25 }
+    - { name: v26, numeric: 26 }
+    - { name: v27, numeric: 27 }
+    - { name: v28, numeric: 28 }
+    - { name: v29, numeric: 29 }
+    - { name: v30, numeric: 30 }
+    - { name: v31, numeric: 31 }
+
+R5900_vf:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: vf0,  numeric:  0 }
+    - { name: vf1,  numeric:  1 }
+    - { name: vf2,  numeric:  2 }
+    - { name: vf3,  numeric:  3 }
+    - { name: vf4,  numeric:  4 }
+    - { name: vf5,  numeric:  5 }
+    - { name: vf6,  numeric:  6 }
+    - { name: vf7,  numeric:  7 }
+    - { name: vf8,  numeric:  8 }
+    - { name: vf9,  numeric:  9 }
+    - { name: vf10, numeric: 10 }
+    - { name: vf11, numeric: 11 }
+    - { name: vf12, numeric: 12 }
+    - { name: vf13, numeric: 13 }
+    - { name: vf14, numeric: 14 }
+    - { name: vf15, numeric: 15 }
+    - { name: vf16, numeric: 16 }
+    - { name: vf17, numeric: 17 }
+    - { name: vf18, numeric: 18 }
+    - { name: vf19, numeric: 19 }
+    - { name: vf20, numeric: 20 }
+    - { name: vf21, numeric: 21 }
+    - { name: vf22, numeric: 22 }
+    - { name: vf23, numeric: 23 }
+    - { name: vf24, numeric: 24 }
+    - { name: vf25, numeric: 25 }
+    - { name: vf26, numeric: 26 }
+    - { name: vf27, numeric: 27 }
+    - { name: vf28, numeric: 28 }
+    - { name: vf29, numeric: 29 }
+    - { name: vf30, numeric: 30 }
+    - { name: vf31, numeric: 31 }
+
+R5900_vi:
+  # prefix: RabbitizerRegister
+  enum_entry_prefix: REG
+  data:
+    - { name: vi0,  numeric:  0 }
+    - { name: vi1,  numeric:  1 }
+    - { name: vi2,  numeric:  2 }
+    - { name: vi3,  numeric:  3 }
+    - { name: vi4,  numeric:  4 }
+    - { name: vi5,  numeric:  5 }
+    - { name: vi6,  numeric:  6 }
+    - { name: vi7,  numeric:  7 }
+    - { name: vi8,  numeric:  8 }
+    - { name: vi9,  numeric:  9 }
+    - { name: vi10, numeric: 10 }
+    - { name: vi11, numeric: 11 }
+    - { name: vi12, numeric: 12 }
+    - { name: vi13, numeric: 13 }
+    - { name: vi14, numeric: 14 }
+    - { name: vi15, numeric: 15 }
+    - { name: vi16, numeric: 16 }
+    - { name: vi17, numeric: 17 }
+    - { name: vi18, numeric: 18 }
+    - { name: vi19, numeric: 19 }
+    - { name: vi20, numeric: 20 }
+    - { name: vi21, numeric: 21 }
+    - { name: vi22, numeric: 22 }
+    - { name: vi23, numeric: 23 }
+    - { name: vi24, numeric: 24 }
+    - { name: vi25, numeric: 25 }
+    - { name: vi26, numeric: 26 }
+    - { name: vi27, numeric: 27 }
+    - { name: vi28, numeric: 28 }
+    - { name: vi29, numeric: 29 }
+    - { name: vi30, numeric: 30 }
+    - { name: vi31, numeric: 31 }

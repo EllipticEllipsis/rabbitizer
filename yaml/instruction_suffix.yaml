@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: © 2022 Decompollaborate
+# SPDX-License-Identifier: MIT
+
+---
+Instruction_Suffix:
+  data:
+    - { set: all, name: none }
+    - { set: r5900, name: xyzw }
+    - { set: all, name: max }

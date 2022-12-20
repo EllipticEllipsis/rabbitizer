@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: © 2022 Decompollaborate
+# SPDX-License-Identifier: MIT
+
+Abi:
+  data:
+    - NUMERIC
+    - O32
+    - N32
+    - N64
+    - MAX

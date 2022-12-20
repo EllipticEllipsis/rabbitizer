@@ -1,0 +1,7 @@
+---
+Instruction_Set:
+  enum_entry_prefix: INSTRSET
+  data:
+    - core
+    - rsp
+    - r5900

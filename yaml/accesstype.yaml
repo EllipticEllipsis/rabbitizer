@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: © 2022 Decompollaborate
+# SPDX-License-Identifier: MIT
+
+---
+AccessType:
+  data:
+    - INVALID
+    - BYTE
+    - SHORT
+    - WORD
+    - DOUBLEWORD
+    - FLOAT
+    - DOUBLEFLOAT

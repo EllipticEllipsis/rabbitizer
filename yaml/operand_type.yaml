@@ -1,0 +1,97 @@
+# SPDX-FileCopyrightText: © 2022 Decompollaborate
+# SPDX-License-Identifier: MIT
+
+---
+Operand_type:
+  enum_entry_prefix: OPERAND
+  callback_type: OperandCallback
+  callback_table_var: instrOperandCallbacks
+
+  data:
+    - { prefix: all, name: invalid }
+
+# core, ordinary processor
+    - { set: core, name: rs }
+    - { set: core, name: rs }
+    - { set: core, name: rt }
+    - { set: core, name: rd }
+    - { set: core, name: sa }
+    - { set: core, name: zero } # $zero
+#     - { set: core, name: function }
+    - { set: core, name: cop0d }
+    - { set: core, name: fs }
+    - { set: core, name: ft }
+    - { set: core, name: fd }
+    - { set: core, name: cop1cs } # Coprocessor 1 control fs
+    - { set: core, name: cop2t }
+    - { set: core, name: op }
+    - { set: core, name: code }
+    - { set: core, name: code_lower }
+    - { set: core, name: copraw }
+    - { set: core, name: label }
+    - { set: core, name: immediate }
+    - { set: core, name: branch_target_label }
+
+# composed/aliased operands
+    - { set: core, name: immediate_base }
+    - { set: core, name: maybe_rd_rs } # $rd is omitted if it is $ra
+
+# rsp
+
+    - { prefix: rsp, name: rs }
+    - { prefix: rsp, name: rt }
+    - { prefix: rsp, name: rd }
+    - { prefix: rsp, name: cop0d }
+    - { prefix: rsp, name: cop2t }
+    - { prefix: rsp, name: cop2cd } # Coprocessor 2 control rd
+    - { prefix: rsp, name: vs }
+    - { prefix: rsp, name: vt }
+    - { prefix: rsp, name: vd }
+#     - { prefix: rsp, name: elementhigh }
+#     - { prefix: rsp, name: elementlow }
+#     - { prefix: rsp, name: index }
+#     - { prefix: rsp, name: offset }
+
+# composed/aliased operands
+    - { prefix: rsp, name: vt_elementhigh }
+    - { prefix: rsp, name: vt_elementlow }
+    - { prefix: rsp, name: vd_de }
+    - { prefix: rsp, name: vs_index }
+    - { prefix: rsp, name: offset_rs }
+    - { prefix: rsp, name: immediate_base }
+    - { prefix: rsp, name: maybe_rd_rs }
+
+
+# r5900
+    - { prefix: r5900, name: I }
+    - { prefix: r5900, name: Q }
+    - { prefix: r5900, name: R }
+    - { prefix: r5900, name: ACC }
+    - { prefix: r5900, name: ACCxyzw }
+    - { prefix: r5900, name: vfs }
+    - { prefix: r5900, name: vft }
+    - { prefix: r5900, name: vfd }
+    - { prefix: r5900, name: vfsxyzw }
+    - { prefix: r5900, name: vftxyzw }
+    - { prefix: r5900, name: vfdxyzw }
+    - { prefix: r5900, name: vfsn }
+    - { prefix: r5900, name: vftn }
+    - { prefix: r5900, name: vfdn }
+    - { prefix: r5900, name: vfsl }
+    - { prefix: r5900, name: vftl }
+    - { prefix: r5900, name: vfdl }
+    - { prefix: r5900, name: vfsm }
+    - { prefix: r5900, name: vftm }
+    - { prefix: r5900, name: vfdm }
+    - { prefix: r5900, name: vis }
+    - { prefix: r5900, name: vit }
+    - { prefix: r5900, name: vid }
+    - { prefix: r5900, name: vis_predecr }
+    - { prefix: r5900, name: vit_predecr }
+    - { prefix: r5900, name: vid_predecr }
+    - { prefix: r5900, name: vis_postincr }
+    - { prefix: r5900, name: vit_postincr }
+    - { prefix: r5900, name: vid_postincr }
+    - { prefix: r5900, name: immediate5 }
+
+    - { prefix: all, name: max }
