@@ -6,9 +6,8 @@ Operand_type:
   enum_entry_prefix: OPERAND
   callback_type: OperandCallback
   callback_table_var: instrOperandCallbacks
-
   data:
-    - { prefix: all, name: invalid }
+    - { set: all, name: invalid }
 
 # core, ordinary processor
     - { set: core, name: rs }
@@ -38,60 +37,60 @@ Operand_type:
 
 # rsp
 
-    - { prefix: rsp, name: rs }
-    - { prefix: rsp, name: rt }
-    - { prefix: rsp, name: rd }
-    - { prefix: rsp, name: cop0d }
-    - { prefix: rsp, name: cop2t }
-    - { prefix: rsp, name: cop2cd } # Coprocessor 2 control rd
-    - { prefix: rsp, name: vs }
-    - { prefix: rsp, name: vt }
-    - { prefix: rsp, name: vd }
-#     - { prefix: rsp, name: elementhigh }
-#     - { prefix: rsp, name: elementlow }
-#     - { prefix: rsp, name: index }
-#     - { prefix: rsp, name: offset }
+    - { set: rsp, name: rs }
+    - { set: rsp, name: rt }
+    - { set: rsp, name: rd }
+    - { set: rsp, name: cop0d }
+    - { set: rsp, name: cop2t }
+    - { set: rsp, name: cop2cd } # Coprocessor 2 control rd
+    - { set: rsp, name: vs }
+    - { set: rsp, name: vt }
+    - { set: rsp, name: vd }
+#     - { set: rsp, name: elementhigh }
+#     - { set: rsp, name: elementlow }
+#     - { set: rsp, name: index }
+#     - { set: rsp, name: offset }
 
 # composed/aliased operands
-    - { prefix: rsp, name: vt_elementhigh }
-    - { prefix: rsp, name: vt_elementlow }
-    - { prefix: rsp, name: vd_de }
-    - { prefix: rsp, name: vs_index }
-    - { prefix: rsp, name: offset_rs }
-    - { prefix: rsp, name: immediate_base }
-    - { prefix: rsp, name: maybe_rd_rs }
+    - { set: rsp, name: vt_elementhigh }
+    - { set: rsp, name: vt_elementlow }
+    - { set: rsp, name: vd_de }
+    - { set: rsp, name: vs_index }
+    - { set: rsp, name: offset_rs }
+    - { set: rsp, name: immediate_base }
+    - { set: rsp, name: maybe_rd_rs }
 
 
 # r5900
-    - { prefix: r5900, name: I }
-    - { prefix: r5900, name: Q }
-    - { prefix: r5900, name: R }
-    - { prefix: r5900, name: ACC }
-    - { prefix: r5900, name: ACCxyzw }
-    - { prefix: r5900, name: vfs }
-    - { prefix: r5900, name: vft }
-    - { prefix: r5900, name: vfd }
-    - { prefix: r5900, name: vfsxyzw }
-    - { prefix: r5900, name: vftxyzw }
-    - { prefix: r5900, name: vfdxyzw }
-    - { prefix: r5900, name: vfsn }
-    - { prefix: r5900, name: vftn }
-    - { prefix: r5900, name: vfdn }
-    - { prefix: r5900, name: vfsl }
-    - { prefix: r5900, name: vftl }
-    - { prefix: r5900, name: vfdl }
-    - { prefix: r5900, name: vfsm }
-    - { prefix: r5900, name: vftm }
-    - { prefix: r5900, name: vfdm }
-    - { prefix: r5900, name: vis }
-    - { prefix: r5900, name: vit }
-    - { prefix: r5900, name: vid }
-    - { prefix: r5900, name: vis_predecr }
-    - { prefix: r5900, name: vit_predecr }
-    - { prefix: r5900, name: vid_predecr }
-    - { prefix: r5900, name: vis_postincr }
-    - { prefix: r5900, name: vit_postincr }
-    - { prefix: r5900, name: vid_postincr }
-    - { prefix: r5900, name: immediate5 }
+    - { set: r5900, name: I }
+    - { set: r5900, name: Q }
+    - { set: r5900, name: R }
+    - { set: r5900, name: ACC }
+    - { set: r5900, name: ACCxyzw }
+    - { set: r5900, name: vfs }
+    - { set: r5900, name: vft }
+    - { set: r5900, name: vfd }
+    - { set: r5900, name: vfsxyzw }
+    - { set: r5900, name: vftxyzw }
+    - { set: r5900, name: vfdxyzw }
+    - { set: r5900, name: vfsn }
+    - { set: r5900, name: vftn }
+    - { set: r5900, name: vfdn }
+    - { set: r5900, name: vfsl }
+    - { set: r5900, name: vftl }
+    - { set: r5900, name: vfdl }
+    - { set: r5900, name: vfsm }
+    - { set: r5900, name: vftm }
+    - { set: r5900, name: vfdm }
+    - { set: r5900, name: vis }
+    - { set: r5900, name: vit }
+    - { set: r5900, name: vid }
+    - { set: r5900, name: vis_predecr }
+    - { set: r5900, name: vit_predecr }
+    - { set: r5900, name: vid_predecr }
+    - { set: r5900, name: vis_postincr }
+    - { set: r5900, name: vit_postincr }
+    - { set: r5900, name: vid_postincr }
+    - { set: r5900, name: immediate5 }
 
-    - { prefix: all, name: max }
+    - { set: all, name: max }

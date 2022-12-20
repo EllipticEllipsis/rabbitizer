@@ -2,6 +2,7 @@
 import argparse
 import sys
 import yaml
+from typing import Union
 
 
 def snake_case_to_PascalCase(s: str) -> str:
@@ -32,24 +33,44 @@ ENUM_FOOT = """
 """
 
 
-def write_enum(name: str, data: list):
+def make_enum_entry_prefix(name: str, data: list) -> str:
+    return "_".join(
+        [
+            x
+            for x in [
+                RABBITIZER_ENUM_VARIANT_PREFIX,
+                data.get("enum_entry_prefix", ""),
+                name.upper(),
+            ]
+            if x != ""
+        ]
+    )
+
+
+def make_enum_entry_variant(name: str, entry: dict) -> str:
+    if type(entry) != dict:
+        variant = entry
+    elif entry.get("set"):
+        variant = f'{entry.get("set")}_{str(entry["name"])}'
+    else:
+        variant = str(entry["name"])
+    return variant.upper()
+
+
+def write_enum(name: str, data: Union[list, str]):
     print(
         ENUM_HEAD.format(
-            prefix= RABBITIZER_TYPE_PREFIX + data.get("prefix", ""),
+            prefix=RABBITIZER_TYPE_PREFIX + data.get("var_prefix", ""),
             name=snake_case_to_PascalCase(name),
         )
     )
-    prefix = "_".join([ x for x in [RABBITIZER_ENUM_VARIANT_PREFIX, data.get("enum_entry_prefix"), name.upper()] if x is not None ])
+    entry_prefix = make_enum_entry_prefix(name, data)
+
     for i, entry in enumerate(data["data"]):
-        if type(entry) != dict:
-            variant = entry
-        elif entry.get("set"):
-            variant = f'{entry.get("set")}_{str(entry["name"])}'.upper()
-        else:
-            variant = str(entry["name"]).upper()
+        variant = make_enum_entry_variant(name, entry)
         print(
             ENUM_ENTRY.format(
-                enum_entry_prefix=prefix,
+                enum_entry_prefix=entry_prefix,
                 variant=variant,
                 number=i,
             )
@@ -57,7 +78,7 @@ def write_enum(name: str, data: list):
 
     print(
         ENUM_FOOT.format(
-            prefix="Rabbitizer",
+            prefix=RABBITIZER_TYPE_PREFIX + data.get("var_prefix", ""),
             name=snake_case_to_PascalCase(name),
         )
     )
@@ -69,58 +90,28 @@ TABLE_FOOT = """
 }};
 """
 
-DESCRIPTOR_TABLE_HEAD = """
-const {ctype} {prefix}_{name}_Descriptors[] {{
+
+REGNAME_TABLE_HEAD = """
+const {ctype} {prefix}{name}_Names[][2] {{
 """
 
 
-def write_descriptor_table(name, data):
-    ctype = data["prefix"] + "Descriptor"
-    print(
-        DESCRIPTOR_TABLE_HEAD.format(
-            ctype=ctype,
-            prefix=data["prefix"],
-            name=snake_case_to_PascalCase(name),
-        )
-    )
-    for entry in data["data"]:
-        print(
-            TABLE_ENTRY_START.format(
-                prefix=name.upper(),
-                variant=entry["name"],
-            ),
-            end="",
-        )
-        print("{ ", end="")
-        columns_list = [
-            f".{k}={v}" for k, v in entry.items() if k not in ["name", "numeric"]
-        ]
-        # replace Pythonic truth by C truth
-        columns_str = ", ".join(columns_list).replace("=True", "=true")
-        print(columns_str if columns_str else "0", end="")
-        print(" },")
-    print(TABLE_FOOT)
-
-
-NAME_TABLE_HEAD = """
-const {ctype} {prefix}_{name}_Names[][2] {{
-"""
-
-
-def write_name_table(name, data):
+def write_regname_table(name: str, data: list):
     ctype = "char*"
     print(
         NAME_TABLE_HEAD.format(
             ctype=ctype,
-            prefix=data["prefix"],
+            prefix=RABBITIZER_TYPE_PREFIX + data.get("var_prefix", ""),
             name=snake_case_to_PascalCase(name),
         )
     )
+    entry_prefix = make_enum_entry_prefix(name, data)
     for entry in data["data"]:
+        variant = make_enum_entry_variant(name, entry)
         print(
             TABLE_ENTRY_START.format(
-                prefix=name.upper(),
-                variant=entry["name"],
+                enum_entry_prefix=entry_prefix,
+                variant=variant,
             ),
             end="",
         )
@@ -133,12 +124,86 @@ def write_name_table(name, data):
         )
         print(" },")
 
-    print(TABLE_FOOT)
+    print(TABLE_FOOT.format())
+
+
+NAME_TABLE_HEAD = """
+const {ctype} {prefix}{name}_Names[] {{
+"""
+
+
+def write_name_table(name: str, data: list):
+    ctype = "char*"
+    print(
+        NAME_TABLE_HEAD.format(
+            ctype=ctype,
+            prefix=RABBITIZER_TYPE_PREFIX + data.get("var_prefix", ""),
+            name=snake_case_to_PascalCase(name),
+        )
+    )
+    entry_prefix = make_enum_entry_prefix(name, data)
+    for entry in data["data"]:
+        variant = make_enum_entry_variant(name, entry)
+        print(
+            TABLE_ENTRY_START.format(
+                enum_entry_prefix=entry_prefix,
+                variant=variant,
+            ),
+            end="",
+        )
+        print(
+            '"{name}",'.format(name=variant),
+        )
+
+    print(TABLE_FOOT.format())
+
+
+DESCRIPTOR_TABLE_HEAD = """
+const {ctype} {prefix}_{name}_Descriptors[] {{
+"""
+
+
+def write_descriptor_table(name: str, data: list):
+    ctype = RABBITIZER_TYPE_PREFIX + data["var_prefix"] + "Descriptor"
+    print(
+        DESCRIPTOR_TABLE_HEAD.format(
+            ctype=ctype,
+            prefix=data["var_prefix"],
+            name=snake_case_to_PascalCase(name),
+        )
+    )
+    entry_prefix = make_enum_entry_prefix(name, data)
+    for entry in data["data"]:
+        variant = make_enum_entry_variant(name, entry)
+        print(
+            TABLE_ENTRY_START.format(
+                enum_entry_prefix=entry_prefix,
+                variant=variant,
+            ),
+            end="",
+        )
+        print("{ ", end="")
+        columns_list = [
+            f".{k}={v}" for k, v in entry.items() if k not in ["name", "numeric"]
+        ]
+        # replace Pythonic truth by C truth
+        columns_str = ", ".join(columns_list).replace("=True", "=true")
+        print(columns_str if columns_str else "0", end="")
+        print(" },")
+    print(TABLE_FOOT.format())
+
 
 CALLBACKS_TABLE_HEAD = "const {ctype} {var}[] = {{"
-CALLBACKS_TABLE_ROW = "    [" + ENUM_NAME + "] = {callback_preprefix}_process_{variant},"
+CALLBACKS_TABLE_ROW = (
+    "    ["
+    + ENUM_NAME
+    + "] = "
+    + RABBITIZER_TYPE_PREFIX
+    + "{prefix}_process_{func_variant},"
+)
 
-def write_callback_table(name, data):
+
+def write_callback_table(name: str, data: list):
     ctype = data["callback_type"]
     print(
         CALLBACKS_TABLE_HEAD.format(
@@ -146,24 +211,29 @@ def write_callback_table(name, data):
             var=data["callback_table_var"],
         )
     )
+    entry_prefix = make_enum_entry_prefix(name, data)
     for entry in data["data"]:
-        if entry["prefix"] != "ALL":
+        variant = make_enum_entry_variant(name, entry)
+        if entry["set"] != "all":
             print(
                 CALLBACKS_TABLE_ROW.format(
-                    enum_entry_prefix=data["enum_entry_prefix"],
-                    variant=f'{entry["prefix"]}_{entry["operand"]}',
-                    callback_preprefix=f"Rabbitizer{snake_case_to_PascalCase(name)}",
-                    operand=entry["operand"],
+                    enum_entry_prefix=entry_prefix,
+                    variant=variant,
+                    prefix=snake_case_to_PascalCase(name),
+                    func_variant=variant.lower(),
                 )
             )
-    print(TABLE_FOOT)
+    print(TABLE_FOOT.format())
+
 
 MODE_SELECT = {
     "enum": write_enum,
     "desc": write_descriptor_table,
-    "name": write_name_table,
-    "call": write_callback_table,
+    "regname": write_regname_table,
+    "names": write_name_table,
+    "callbacks": write_callback_table,
 }
+
 
 def main() -> None:
     mode = sys.argv[1]
@@ -177,6 +247,7 @@ def main() -> None:
 
         for name, data in y.items():
             MODE_SELECT[mode](name, data)
+
 
 if __name__ == "__main__":
     main()

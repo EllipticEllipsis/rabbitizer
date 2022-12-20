@@ -1,6 +1,6 @@
 ---
 Gpr_o32:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: zero, numeric:  0, isZero: true }
@@ -37,7 +37,7 @@ Gpr_o32:
     - { name: ra,   numeric: 31, isClobberedByFuncCall: true, isRa: true }
 
 Gpr_n32:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: zero, numeric:  0, isZero: true }
@@ -74,7 +74,7 @@ Gpr_n32:
     - { name: ra,   numeric: 31, isClobberedByFuncCall: true, isRa: true }
 
 Cop0:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: Index,      numeric:  0 }
@@ -111,7 +111,7 @@ Cop0:
     - { name: Reserved31, numeric: 31, isReserved: true }
 
 Cop1_o32:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: fv0,  numeric:  f0 }
@@ -148,7 +148,7 @@ Cop1_o32:
     - { name: fs5f, numeric: f31 }
 
 Cop1_n32:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: fv0,  numeric:  f0 }
@@ -185,7 +185,7 @@ Cop1_n32:
     - { name: ft13, numeric: f31 }
 
 Cop1_n64:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: fv0,  numeric:  f0 }
@@ -222,7 +222,7 @@ Cop1_n64:
     - { name: fs7,  numeric: f31 }
 
 Cop1_control:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name:  0,     numeric:  0 }
@@ -259,7 +259,7 @@ Cop1_control:
     - { name: FpcCsr, numeric: 31 }
 
 Cop2:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: 0,  numeric:  0 }
@@ -296,7 +296,7 @@ Cop2:
     - { name: 31, numeric: 31 }
 
 Rsp_gpr:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: zero, numeric:  0, isZero: true }
@@ -333,7 +333,7 @@ Rsp_gpr:
     - { name: ra,   numeric: 31, isClobberedByFuncCall: true, isRa: true }
 
 Rsp_cop0:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: ADDR,      numeric:  0 }
@@ -354,7 +354,7 @@ Rsp_cop0:
     - { name: TMEM,      numeric: 15 }
 
 Rsp_cop2:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name:  0, numeric:  0 }
@@ -391,7 +391,7 @@ Rsp_cop2:
     - { name: 31, numeric: 31 }
 
 Rsp_cop2_control:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name:  0, numeric:  0 }
@@ -428,7 +428,7 @@ Rsp_cop2_control:
     - { name: 31, numeric: 31 }
 
 Rsp_vector:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: v0,  numeric:  0 }
@@ -465,7 +465,7 @@ Rsp_vector:
     - { name: v31, numeric: 31 }
 
 R5900_vf:
-  # prefix: RabbitizerRegister
+  var_prefix: Register
   enum_entry_prefix: REG
   data:
     - { name: vf0,  numeric:  0 }
@@ -502,7 +502,7 @@ R5900_vf:
     - { name: vf31, numeric: 31 }
 
 R5900_vi:
-  # prefix: RabbitizerRegister
+  var_prefix: Register_
   enum_entry_prefix: REG
   data:
     - { name: vi0,  numeric:  0 }
