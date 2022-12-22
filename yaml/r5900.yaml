@@ -1,0 +1,2202 @@
+# SPDX-FileCopyrightText: © 2022 Decompollaborate
+# SPDX-License-Identifier: MIT
+
+
+#! @note: `index` can come from various parts of the instruction word, it is used for lookup in the appropriate table; 
+#! it is assumed that the code already knows which this is.
+
+instruction_sets:
+- set: r5900
+  classes:
+  - instructions:
+    - name: INVALID
+      operands: [cpu_rs, cpu_rt, cpu_immediate]
+
+# ============================================================
+  - class: normal
+    instructions:
+
+    #     31---------26---------------------------------------------------0
+    #     |  opcode   |                                                   |
+    #     ------6----------------------------------------------------------
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    # 000 | *1    | *2    | J     | JAL   | BEQ   | BNE   | BLEZ  | BGTZ  |
+    # 001 | ADDI  | ADDIU | SLTI  | SLTIU | ANDI  | ORI   | XORI  | LUI   |
+    # 010 | *3    | *4    |  *5   | ---   | BEQL  | BNEL  | BLEZL | BGTZL |
+    # 011 | DADDI |DADDIU | LDL   | LDR   |  *6   |  ---  |  LQ   | SQ    |
+    # 100 | LB    | LH    | LWL   | LW    | LBU   | LHU   | LWR   | LWU   |
+    # 101 | SB    | SH    | SWL   | SW    | SDL   | SDR   | SWR   | CACHE |
+    # 110 | ---   | LWC1  | ---   | PREF  | ---   | ---   | LQC2  | LD    |
+    # 111 | ---   | SWC1  | ---   | ---   | ---   | ---   | SQC2  | SD    |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+    #      *1 = SPECIAL, see SPECIAL list    *2 = REGIMM, see REGIMM list
+    #      *3 = COP0                         *4 = COP1
+    #      *5 = COP2                         *6 = MMI table
+
+    # The other instructions are implemented using the main CPU table
+
+    - name: lq
+      index: 0x1E
+      mnemonic: "Load Quadword"
+      operands: [cpu_rt, cpu_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: sq
+      index: 0x1F
+      mnemonic: "Store Quadword"
+      operands: [cpu_rt, cpu_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+
+    - name: lqc2
+      index: 0x36
+      operands: [r5900_vft, cpu_immediate_base]
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+
+    - name: sqc2
+      index: 0x3E
+      operands: [r5900_vft, cpu_immediate_base]
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+
+# ------------------------------------------------------------
+  - class: special
+    instructions:
+
+    #     31---------26------------------------------------------5--------0
+    #     | = SPECIAL |                                         | function|
+    #     ------6----------------------------------------------------6-----
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    # 000 | SLL   | ---   | SRL   | SRA   | SLLV  |  ---  | SRLV  | SRAV  |
+    # 001 | JR    | JALR  | MOVZ  | MOVN  |SYSCALL| BREAK |  ---  | SYNC  |
+    # 010 | MFHI  | MTHI  | MFLO  | MTLO  | DSLLV |  ---  | DSRLV | DSRAV |
+    # 011 | MULT  | MULTU | DIV   | DIVU  | ----  |  ---  | ----  | ----- |
+    # 100 | ADD   | ADDU  | SUB   | SUBU  | AND   | OR    | XOR   | NOR   |
+    # 101 | MFSA  | MTSA  | SLT   | SLTU  | DADD  | DADDU | DSUB  | DSUBU |
+    # 110 | TGE   | TGEU  | TLT   | TLTU  | TEQ   |  ---  | TNE   |  ---  |
+    # 111 | DSLL  |  ---  | DSRL  | DSRA  |DSLL32 |  ---  |DSRL32 |DSRA32 |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+
+    # The other instructions are implemented using the main CPU table
+
+    - name: sync_p
+      index: -0x0F
+      mnemonic: "Sync"
+      operands: []
+
+
+    - name: mult
+      index: 0x18
+      mnemonic: "MULTtiply word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: mfsa
+      index: 0x28
+      mnemonic: "Move From Shift Amount register"
+      operands: [cpu_rd]
+      modifiesRd: true
+
+    - name: mtsa
+      index: 0x29
+      mnemonic: "Move To Shift Amount register"
+      operands: [cpu_rs]
+      readsRs: true
+
+
+# ------------------------------------------------------------
+  - class: regimm
+    instructions:
+
+    #     31---------26----------20-------16------------------------------0
+    #     | = REGIMM  |          |   rt    |                              |
+    #     ------6---------------------5------------------------------------
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    #  00 | BLTZ  | BGEZ  | BLTZL | BGEZL |  ---  |  ---  |  ---  |  ---  |
+    #  01 | TGEI  | TGEIU | TLTI  | TLTIU | TEQI  |  ---  | TNEI  |  ---  |
+    #  10 | BLTZAL| BGEZAL|BLTZALL|BGEZALL|  ---  |  ---  |  ---  |  ---  |
+    #  11 | MTSAB | MTSAH |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+
+    # The other instructions are implemented using the main CPU table
+
+    # OP rs, IMM
+
+    - name: mtsab
+      index: 0x18
+      operands: [cpu_rs, cpu_immediate]
+      readsRs: true
+
+    - name: mtsah
+      index: 0x19
+      operands: [cpu_rs, cpu_immediate]
+      readsRs: true
+
+
+# ============================================================
+  - class: mmi
+    instructions:
+
+    #     31---------26------------------------------------------5--------0
+    #     | = MMI     |                                         | function|
+    #     ------6----------------------------------------------------6-----
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    # 000 | MADD  | MADDU |  ---  |  ---  | PLZCW |  ---  |  ---  |  ---  |
+    # 001 |  *1   |  *2   |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 010 | MFHI1 | MTHI1 | MFLO1 | MTLO1 |  ---  |  ---  |  ---  |  ---  |
+    # 011 | MULT1 | MULTU1| DIV1  | DIVU1 |  ---  |  ---  |  ---  |  ---  |
+    # 100 | MADD1 | MADDU1|  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 101 |  *3   |  *4   |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 110 | PMFHL | PMTHL |  ---  |  ---  | PSLLH |  ---  | PSRLH | PSRAH |
+    # 111 |  ---  |  ---  |  ---  |  ---  | PSLLW |  ---  | PSRLW | PSRAW |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+    #      *1 = MMI0 list                    *2 = MMI2 list
+    #      *3 = MMI1 list                    *4 = MMI3 list
+
+    - name: madd
+      index: 0x00
+      mnemonic: "Multiply-ADD word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: maddu
+      index: 0x01
+      mnemonic: "Multiply-ADD Unsigned word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: plzcw
+      index: 0x04
+      mnemonic: "Parallel Leading Zero or one Count Word"
+      operands: [cpu_rd, cpu_rs]
+      modifiesRd: true
+      readsRs: true
+
+
+    - name: mfhi1
+      index: 0x10
+      mnemonic: "Move From HI1 register"
+      operands: [cpu_rd]
+      modifiesRd: true
+
+    - name: mthi1
+      index: 0x11
+      mnemonic: "Move To HI1 register"
+      operands: [cpu_rs]
+      readsRs: true
+
+    - name: mflo1
+      index: 0x12
+      mnemonic: "Move From LO1 register"
+      operands: [cpu_rd]
+      readsRd: true
+
+    - name: mtlo1
+      index: 0x13
+      mnemonic: "Move To LO1 register"
+      operands: [cpu_rs]
+      readsRs: true
+
+
+    - name: mult1
+      index: 0x18
+      mnemonic: "MULTiply word pipeline 1"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: multu1
+      index: 0x19
+      mnemonic: "MULTiply Unsigned word pipeline 1"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: div1
+      index: 0x1A
+      mnemonic: "DIVide word pipeline 1"
+      operands: [cpu_zero, cpu_rs, cpu_rt]
+      readsRs: true
+      readsRt: true
+
+    - name: divu1
+      index: 0x1B
+      mnemonic: "DIVide Unsigned word pipeline 1"
+      operands: [cpu_zero, cpu_rs, cpu_rt]
+      readsRs: true
+      readsRt: true
+
+
+    - name: madd1
+      index: 0x20
+      mnemonic: "Multiply-ADD word pipeline 1"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: maddu1
+      index: 0x21
+      mnemonic: "Multiply-ADD Unsigned word pipeline 1"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    # TODO: check this two instruction, it is supposed to have an extra .fmt
+
+    - name: pmfhl
+      index: 0x30
+      mnemonic: "Parallel Move From Hi/Lo register"
+      operands: [cpu_rd]
+      modifiesRd: true
+
+    - name: pmthl
+      index: 0x31
+      mnemonic: "Parallel Move To Hi/Lo register"
+      operands: [cpu_rs]
+      readsRs: true
+
+
+    - name: psllh
+      index: 0x34
+      mnemonic: "Parallel Shift Left Logical Halfword"
+      operands: [cpu_rd, cpu_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: psrlh
+      index: 0x36
+      mnemonic: "Parallel Shift Right Logical Halfword"
+      operands: [cpu_rd, cpu_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: psrah
+      index: 0x37
+      mnemonic: "Parallel Shift Right Arithmetic Halfword"
+      operands: [cpu_rd, cpu_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+
+    - name: psllw
+      index: 0x3C
+      mnemonic: "Parallel Shift Left Logical Word"
+      operands: [cpu_rd, cpu_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: psrlw
+      index: 0x3E
+      mnemonic: "Parallel Shift Right Logical Word"
+      operands: [cpu_rd, cpu_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: psraw
+      index: 0x3F
+      mnemonic: "Parallel Shift Right Arithmetic Word"
+      operands: [cpu_rd, cpu_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+
+# ------------------------------------------------------------
+  - class: mmi_0
+    instructions:
+
+    #     31---------26------------------------------10--------6-5--------0
+    #     |          |                              |function  |   MMI0   |
+    #     ------6----------------------------------------------------6-----
+    #     |---00--|---01--|---10--|---11--| lo
+    # 000 |PADDW  | PSUBW | PCGTW | PMAXW |
+    # 001 |PADDH  | PSUBH | PCGTH | PMAXH |
+    # 010 |PADDB  | PSUBB | PCGTB |  ---  |
+    # 011 | ---   | ---   |  ---  |  ---  |
+    # 100 |PADDSW |PSUBSW |PEXTLW | PPACW |
+    # 101 |PADDSH |PSUBSH |PEXTLH | PPACH |
+    # 110 |PADDSB |PSUBSB |PEXTLB | PPACB |
+    # 111 | ---   |  ---  | PEXT5 | PPAC5 |
+    #  hi |-------|-------|-------|-------|
+
+    - name: paddw
+      index: 0x00
+      mnemonic: "Parallel ADD Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubw
+      index: 0x01
+      mnemonic: "Parallel SUBtract Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pcgtw
+      index: 0x02
+      mnemonic: "Parallel Compare for Greater Than Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pmaxw
+      index: 0x03
+      mnemonic: "Parallel MAXimum Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: paddh
+      index: 0x04
+      mnemonic: "Parallel ADD Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubh
+      index: 0x05
+      mnemonic: "Parallel SUBtract Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pcgth
+      index: 0x06
+      mnemonic: "Parallel Compare for Greater Than Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pmaxh
+      index: 0x07
+      mnemonic: "Parallel MAXimum Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: paddb
+      index: 0x08
+      mnemonic: "Parallel ADD Byte"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubb
+      index: 0x09
+      mnemonic: "Parallel SUBtract Byte"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pcgtb
+      index: 0x0A
+      mnemonic: "Parallel Compare for Greater Than Byte"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: paddsw
+      index: 0x10
+      mnemonic: "Parallel ADD with Signed saturation Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubsw
+      index: 0x11
+      mnemonic: "Parallel SUBtract with Signed saturation Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pextlw
+      index: 0x12
+      mnemonic: "Parallel EXTend Lower from Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: ppacw
+      index: 0x13
+      mnemonic: "Parallel PACk to Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: paddsh
+      index: 0x14
+      mnemonic: "Parallel ADD with Signed saturation Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubsh
+      index: 0x15
+      mnemonic: "Parallel SUBtract with Signed saturation Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pextlh
+      index: 0x16
+      mnemonic: "Parallel EXTend Lower from Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: ppach
+      index: 0x17
+      mnemonic: "Parallel PACk to Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: paddsb
+      index: 0x18
+      mnemonic: "Parallel ADD with Signed saturation Bytes"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubsb
+      index: 0x19
+      mnemonic: "Parallel SUBtract with Signed saturation Bytes"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pextlb
+      index: 0x1A
+      mnemonic: "Parallel EXTend Lower from Bytes"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: ppacb
+      index: 0x1B
+      mnemonic: "Parallel PACk to Bytes"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pext5
+      index: 0x1E
+      mnemonic: "Parallel EXTend from 5-bits"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+    - name: ppac5
+      index: 0x1F
+      mnemonic: "Parallel PACk to 5-bits"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+
+# ------------------------------------------------------------
+  - class: mmi_1
+    instructions:
+
+    #     31---------26------------------------------------------5--------0
+    #     |           |                               |function  |  MMI1  |
+    #     ------6----------------------------------------------------6-----
+    #     |---00--|---01--|---10--|---11--| lo
+    # 000 |  ---  | PABSW | PCEQW | PMINW |
+    # 001 |PADSBH | PABSH | PCEQH | PMINH |
+    # 010 |  ---  |  ---  | PCEQB |  ---  |
+    # 011 |  ---  |  ---  |  ---  |  ---  |
+    # 100 |PADDUW |PSUBUW |PEXTUW |  ---  |
+    # 101 |PADDUH |PSUBUH |PEXTUH |  ---  |
+    # 110 |PADDUB |PSUBUB |PEXTUB | QFSRV |
+    # 111 |  ---  |  ---  |  ---  |  ---  |
+    #  hi |-------|-------|-------|-------|
+
+    # TODO: operands and properties
+
+    - name: pabsw
+      index: 0x01
+      mnemonic: "Parallel ABSolute Word"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+    - name: pceqw
+      index: 0x02
+      mnemonic: "Parallel Compare for EQual Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pminw
+      index: 0x03
+      mnemonic: "Parallel MINimum Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: padsbh
+      index: 0x04
+      mnemonic: "Parallel ADd/SuBtract Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pabsh
+      index: 0x05
+      mnemonic: "Parallel ABSolute Halfword"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+    - name: pceqh
+      index: 0x06
+      mnemonic: "Parallel Compare for EQual Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pminh
+      index: 0x07
+      mnemonic: "Parallel MINimum Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pceqb
+      index: 0x0A
+      mnemonic: "Parallel Compare for EQual Byte"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: padduw
+      index: 0x10
+      mnemonic: "Parallel ADD Unsigned saturation Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubuw
+      index: 0x11
+      mnemonic: "Parallel SUBtract Unsigned saturation Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pextuw
+      index: 0x12
+      mnemonic: "Parallel EXTend Upper from Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: padduh
+      index: 0x14
+      mnemonic: "Parallel ADD Unsigned saturation Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubuh
+      index: 0x15
+      mnemonic: "Parallel SUBtract Unsigned saturation Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pextuh
+      index: 0x16
+      mnemonic: "Parallel EXTend Upper from Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: paddub
+      index: 0x18
+      mnemonic: "Parallel ADD Unsigned saturation Byte"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psubub
+      index: 0x19
+      mnemonic: "Parallel SUBtract Unsigned saturation Byte"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pextub
+      index: 0x1A
+      mnemonic: "Parallel EXTend Upper from Byte"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: qfsrv
+      index: 0x1B
+      mnemonic: "Quadword Funnel Shift Right Variable"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+# ------------------------------------------------------------
+  - class: mmi_2
+    instructions:
+
+    #     31---------26------------------------------------------5--------0
+    #     |           |                              |function   |  MMI2  |
+    #     ------6----------------------------------------------------6-----
+    #     |---00--|---01--|---10--|---11--| lo
+    # 000 |PMADDW |  ---  |PSLLVW |PSRLVW |
+    # 001 |PMSUBW |  ---  |  ---  |  ---  |
+    # 010 |PMFHI  |PMFLO  |PINTH  |  ---  |
+    # 011 |PMULTW |PDIVW  |PCPYLD |  ---  |
+    # 100 |PMADDH |PHMADH | PAND  |  PXOR |
+    # 101 |PMSUBH |PHMSBH |  ---  |  ---  |
+    # 110 | ---   |  ---  | PEXEH | PREVH |
+    # 111 |PMULTH |PDIVBW | PEXEW |PROT3W |
+    #  hi |-------|-------|-------|-------|
+
+    - name: pmaddw
+      index: 0x00
+      mnemonic: "Parallel Multiply-ADD Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psllvw
+      index: 0x02
+      mnemonic: "Parallel Shift Left Logical Variable Word"
+      operands: [cpu_rd, cpu_rt, cpu_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psrlvw
+      index: 0x03
+      mnemonic: "Parallel Shift Right Logical Variable Word"
+      operands: [cpu_rd, cpu_rt, cpu_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pmsubw
+      index: 0x04
+      mnemonic: "Parallel Multiply-SUBtract Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pmfhi
+      index: 0x08
+      mnemonic: "Parallel Move From HI register"
+      operands: [cpu_rd]
+      modifiesRd: true
+
+    - name: pmflo
+      index: 0x09
+      mnemonic: "Parallel Move From LO register"
+      operands: [cpu_rd]
+      modifiesRd: true
+
+    - name: pinth
+      index: 0x0A
+      mnemonic: "Parallel INTerleave Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pmultw
+      index: 0x0C
+      mnemonic: "Parallel MULTiply Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pdivw
+      index: 0x0D
+      mnemonic: "Parallel DIVide Word"
+      operands: [cpu_rs, cpu_rt]
+      readsRs: true
+      readsRt: true
+
+    - name: pcpyld
+      index: 0x0E
+      mnemonic: "Parallel CoPY Lower Doubleword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pmaddh
+      index: 0x10
+      mnemonic: "Parallel Multiply-ADD Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: phmadh
+      index: 0x11
+      mnemonic: "Parallel Horizontal Multiply-ADd Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pand
+      index: 0x12
+      mnemonic: "Parallel AND"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pxor
+      index: 0x13
+      mnemonic: "Parallel eXclusive OR"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pmsubh
+      index: 0x14
+      mnemonic: "Parallel Multiply-SUBtract Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: phmsbh
+      index: 0x15
+      mnemonic: "Parallel Horizontal Multiply-Subtract Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pexeh
+      index: 0x1A
+      mnemonic: "Parallel EXchange Even Halfword"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+    - name: prevh
+      index: 0x1B
+      mnemonic: "Parallel REVerse Halfword"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+
+    - name: pmulth
+      index: 0x1C
+      mnemonic: "Parallel Multiply Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pdivbw
+      index: 0x1D
+      mnemonic: "Parallel DIVide Broadcast Word"
+      operands: [cpu_rs, cpu_rt]
+      readsRs: true
+      readsRt: true
+
+    - name: pexew
+      index: 0x1E
+      mnemonic: "Parallel EXchange Even Word"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+    - name: prot3w
+      index: 0x1F
+      mnemonic: "Parallel ROTate 3 Words left"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+
+# ------------------------------------------------------------
+  - class: mmi_3
+    instructions:
+
+  #     31---------26------------------------------------------5--------0
+  #     |           |                               |function  |  MMI3  |
+  #     ------6----------------------------------------------------6-----
+  #     |---00--|---01--|---10--|---11--| lo
+  # 000 |PMADDUW|  ---  |  ---  |PSRAVW |
+  # 001 |  ---  |  ---  |  ---  |  ---  |
+  # 010 |PMTHI  | PMTLO |PINTEH |  ---  |
+  # 011 |PMULTUW| PDIVUW|PCPYUD |  ---  |
+  # 100 |  ---  |  ---  |  POR  | PNOR  |
+  # 101 |  ---  |  ---  |  ---  |  ---  |
+  # 110 |  ---  |  ---  | PEXCH | PCPYH |
+  # 111 |  ---  |  ---  | PEXCW |  ---  |
+  #  hi |-------|-------|-------|-------|
+
+    - name: pmadduw
+      index: 0x00
+      mnemonic: "Parallel Multiply-ADD Unsigned Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: psravw
+      index: 0x03
+      mnemonic: "Parallel Shift Right Arithmetic Variable Word"
+      operands: [cpu_rd, cpu_rt, cpu_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pmthi
+      index: 0x08
+      mnemonic: "Parallel Move To HI register"
+      operands: [cpu_rs]
+      readsRs: true
+
+    - name: pmtlo
+      index: 0x09
+      mnemonic: "Parallel Move To LO register"
+      operands: [cpu_rs]
+      readsRs: true
+
+    - name: pinteh
+      index: 0x0A
+      mnemonic: "Parallel INTerleave Even Halfword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pmultuw
+      index: 0x0C
+      mnemonic: "Parallel MULTiply Unsigned Word"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pdivuw
+      index: 0x0D
+      mnemonic: "Prallel DIVide Unsigned Word"
+      operands: [cpu_rs, cpu_rt]
+      readsRs: true
+      readsRt: true
+
+    - name: pcpyud
+      index: 0x0E
+      mnemonic: "Parallel CoPY Upper Doubleword"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: por
+      index: 0x12
+      mnemonic: "Parallel OR"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: pnor
+      index: 0x13
+      mnemonic: "Parallel Not OR"
+      operands: [cpu_rd, cpu_rs, cpu_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: pexch
+      index: 0x1A
+      mnemonic: "Parallel EXchange Center Halfword"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+    - name: pcpyh
+      index: 0x1B
+      mnemonic: "Parallel CoPY Halfword"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+
+    - name: pexcw
+      index: 0x1E
+      mnemonic: "Parallel EXchange Center Word"
+      operands: [cpu_rd, cpu_rt]
+      modifiesRd: true
+      readsRt: true
+
+
+# ============================================================
+  - class: cop0_tlb
+    instructions:
+
+    #     31--------26-25------21--------------------------------5--------0
+    #     |  = COP0   |   TLB   |                                |  fmt   |
+    #     ------6----------5-----------------------------------------------
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    # 000 | ---   |  TLBR | TLBWI |  ---  |  ---  |  ---  | TLBWR |  ---  |
+    # 001 | TLBP  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 011 | ERET  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 100 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 101 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 111 |  EI   |  DI   |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+
+    # The other instructions are implemented using the main CPU table
+
+    - name: ei
+      index: 0x38
+      operands: []
+
+    - name: di
+      index: 0x39
+      operands: []
+
+
+# ============================================================
+  - class: cop1_fpu_s
+    instructions:
+
+    #     31--------26-25------21 -------------------------------5--------0
+    #     |  = COP1   |  = S    |                               | function|
+    #     ------6----------5-----------------------------------------6-----
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    # 000 | ADD.S | SUB.S | MUL.S | DIV.S | SQRT.S| ABS.S | MOV.S | NEG.S |
+    # 001 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  | ---   |
+    # 010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |RSQRT.S|  ---  |
+    # 011 | ADDA.S| SUBA.S| MULA.S|  ---  | MADD.S| MSUB.S|MADDA.S|MSUBA.S|
+    # 100 |  ---  | ---   |  ---  |  ---  | CVT.W |  ---  |  ---  |  ---  |
+    # 101 | MAX.S | MIN.S |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 110 | C.F   | ---   | C.EQ  |  ---  | C.LT  |  ---  |  C.LE |  ---  |
+    # 111 | ---   | ---   |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+
+    # The other instructions are implemented using the main CPU table
+
+    - name: c1__sqrt_s
+      index: 0x04
+      operands: [cpu_copraw]
+
+    - name: rsqrt_s
+      index: 0x16
+      mnemonic: "floating point Reciprocal SQuare RooT"
+      operands: [cpu_fd, cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+
+    - name: adda_s
+      index: 0x18
+      mnemonic: "floating point ADD to Accumulator"
+      operands: [cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFs: true
+      readsFt: true
+
+    - name: suba_s
+      index: 0x19
+      mnemonic: "floating point SUBtract to Accumulator"
+      operands: [cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFs: true
+      readsFt: true
+
+    - name: mula_s
+      index: 0x1A
+      mnemonic: "floating point MULtiply to Accumulator"
+      operands: [cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFs: true
+      readsFt: true
+
+
+    - name: madd_s
+      index: 0x1C
+      mnemonic: "floating point Multiply-ADD"
+      operands: [cpu_fd, cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: msub_s
+      index: 0x1D
+      mnemonic: "floating point Multiply abd SUBtract"
+      operands: [cpu_fd, cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: madda_s
+      index: 0x1E
+      mnemonic: "floating point Multiply-ADD Accumulator"
+      operands: [cpu_fs, cpu_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: msuba_s
+      index: 0x1F
+      mnemonic: "floating point Multiply SUBtract from Accumulator"
+      operands: [cpu_fs, cpu_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+
+    - name: max_s
+      index: 0x28
+      mnemonic: "floating point MAXimum"
+      operands: [cpu_fd, cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: min_s
+      index: 0x29
+      mnemonic: "floating point MINimum"
+      operands: [cpu_fd, cpu_fs, cpu_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    # Due to the R5900's FPU being noncomplaint with IEEE-754, the instruction cvt.w.s always behaves as trunc.w.s, because EE can only do round-to-zero.
+    # Assemblers like GAS workaround this issue by decoding cvt.w.s as trunc.w.s, so we mimic that behaviour to allow assembling with GAS.
+    # Here's some reading about the binutils rationale:
+    # https://sourceware.org/legacy-ml/binutils/2012-11/msg00360.html
+    # https://sourceware.org/pipermail/binutils/2013-January/079863.html
+
+    - name: trunc_w_s
+      index: 0x24
+      mnemonic: "Floating-Point Truncate to Word Fixed-Point"
+      operands: [cpu_fd, cpu_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+
+    - name: c_lt_s
+      index: 0x34
+      operands: [cpu_fs, cpu_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_le_s
+      index: 0x36
+      operands: [cpu_fs, cpu_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+
+# ============================================================
+  - class: cop2
+    instructions:
+
+    #     31--------26-25------21 ----------------------------------------0
+    #     |  = COP2   |   fmt   |                                         |
+    #     ------6----------5-----------------------------------------------
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    #  00 |  ---  | QMFC2 | CFC2  |  ---  |  ---  | QMTC2 | CTC2  |  ---  |
+    #  01 | *1    |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  10 | *2    | *2    | *2    | *2    | *2    | *2    | *2    | *2    |
+    #  11 | *2    | *2    | *2    | *2    | *2    | *2    | *2    | *2    |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+    #      *1 = BC instructions, see BC2 list   *2 =see special1 table
+
+    # TODO: properties
+
+    - name: qmfc2
+      index: 0x01
+      operands: [cpu_rt, r5900_vfs]
+      modifiesRt: true
+
+    - name: cfc2
+      index: 0x02
+      operands: [cpu_rt, r5900_vis]
+      modifiesRt: true
+
+    - name: qmtc2
+      index: 0x05
+      operands: [cpu_rt, r5900_vfs]
+      readsRt: true
+
+    - name: ctc2
+      index: 0x06
+      operands: [cpu_rt, r5900_vis]
+      readsRt: true
+
+
+# ------------------------------------------------------------
+  - class: cop2_bc2
+    instructions:
+
+    #     31--------26-25------21-20------16------------------------------0
+    #     |  = COP0   |   BC2   |   fmt   |                               |
+    #     ------6----------5----------5------------------------------------
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    #  00 | BC2F  | BC2T  | BC2FL | BC2TL |  ---  |  ---  |  ---  |  ---  |
+    #  01 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  10 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  11 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+
+    # TODO: operands and properties
+
+    - name: bc2f
+      index: 0x00
+      operands: [cpu_branch_target_label]
+      isBranch: true
+
+    - name: bc2t
+      index: 0x01
+      operands: [cpu_branch_target_label]
+      isBranch: true
+
+    - name: bc2fl
+      index: 0x02
+      operands: [cpu_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+
+    - name: bc2tl
+      index: 0x03
+      operands: [cpu_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+
+
+# ------------------------------------------------------------
+  - class: cop2_special1
+    instructions:
+
+    #     31---------26-25-----21-20-----------------------------5--------0
+    #     |  =COP2   | Special1 |                                |function|
+    #     ------6----------5------------------------------------------6----
+    #     |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    # 000 |VADDx  |VADDy  |VADDz  |VADDw  |VSUBx  |VSUBy  |VSUBz  |VSUBw  |
+    # 001 |VMADDx |VMADDy |VMADDz |VMADDw |VMSUBx |VMSUBy |VMSUBz |VMSUBw |
+    # 010 |VMAXx  |VMAXy  |VMAXz  |VMAXw  |VMINIx |VMINIy |VMINIz |VMINIw |
+    # 011 |VMULx  |VMULy  |VMULz  |VMULw  |VMULq  |VMAXi  |VMULi  |VMINIi |
+    # 100 |VADDq  |VMADDq |VADDi  |VMADDi |VSUBq  |VMSUBq |VSUbi  |VMSUBi |
+    # 101 |VADD   |VMADD  |VMUL   |VMAX   |VSUB   |VMSUB  |VOPMSUB|VMINI  |
+    # 110 |VIADD  |VISUB  |VIADDI |  ---  |VIAND  |VIOR   |  ---  |  ---  |
+    # 111 |VCALLMS|VCALLMSR| ---  |  ---  |  *1   |  *1   |  *1   |  *1   |
+    #  hi |-------|-------|-------|-------|-------|-------|-------|-------|
+    #     *1=see special2 table
+
+    # TODO: properties
+
+    - name: vaddx
+      index: 0x00
+      mnemonic: "ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vaddy
+      index: 0x01
+      mnemonic: "ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vaddz
+      index: 0x02
+      mnemonic: "ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vaddw
+      index: 0x03
+      mnemonic: "ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubx
+      index: 0x04
+      mnemonic: "SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsuby
+      index: 0x05
+      mnemonic: "SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubz
+      index: 0x06
+      mnemonic: "SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubw
+      index: 0x07
+      mnemonic: "SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddx
+      index: 0x08
+      mnemonic: "Multiply-ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddy
+      index: 0x09
+      mnemonic: "Multiply-ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddz
+      index: 0x0A
+      mnemonic: "Multiply-ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddw
+      index: 0x0B
+      mnemonic: "Multiply-ADD broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubx
+      index: 0x0C
+      mnemonic: "Multiply-SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsuby
+      index: 0x0D
+      mnemonic: "Multiply-SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubz
+      index: 0x0E
+      mnemonic: "Multiply-SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubw
+      index: 0x0F
+      mnemonic: "Multiply-SUBtract broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: vmaxx
+      index: 0x10
+      mnemonic: "MAXimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaxy
+      index: 0x11
+      mnemonic: "MAXimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaxz
+      index: 0x12
+      mnemonic: "MAXimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaxw
+      index: 0x13
+      mnemonic: "MAXimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vminix
+      index: 0x14
+      mnemonic: "MINimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vminiy
+      index: 0x15
+      mnemonic: "MINimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vminiz
+      index: 0x16
+      mnemonic: "MINimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vminiw
+      index: 0x17
+      mnemonic: "MINimum broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmulx
+      index: 0x18
+      mnemonic: "MULtiply broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmuly
+      index: 0x19
+      mnemonic: "MULtiply broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmulz
+      index: 0x1A
+      mnemonic: "MULtiply broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmulw
+      index: 0x1B
+      mnemonic: "MULtiply broadcast"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmulq
+      index: 0x1C
+      mnemonic: "MULtiply Q"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaxi
+      index: 0x1D
+      mnemonic: "MAXimum I"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmuli
+      index: 0x1E
+      mnemonic: "MULtiply I"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vminii
+      index: 0x1F
+      mnemonic: "MINImum I"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: vaddq
+      index: 0x20
+      mnemonic: "ADD Q"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddq
+      index: 0x21
+      mnemonic: "Multiply-ADD Q"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vaddi
+      index: 0x22
+      mnemonic: "ADD I"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddi
+      index: 0x23
+      mnemonic: "Multiply-ADD I"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubq
+      index: 0x24
+      mnemonic: "SUBtract Q"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubq
+      index: 0x25
+      mnemonic: "Multiply-SUBtract Q"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubi
+      index: 0x26
+      mnemonic: "SUBtract I"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubi
+      index: 0x27
+      mnemonic: "Multiply-SUBtract I"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vadd
+      index: 0x28
+      mnemonic: "ADD"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmadd
+      index: 0x29
+      mnemonic: "Multiply-ADD"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmul
+      index: 0x2A
+      mnemonic: "MULtiply"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmax
+      index: 0x2B
+      mnemonic: "MAXimum"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsub
+      index: 0x2C
+      mnemonic: "SUBtract"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsub
+      index: 0x2D
+      mnemonic: "Multiply-SUBtract"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vopmsub
+      index: 0x2E
+      mnemonic: "Outer product post decrement"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmini
+      index: 0x2F
+      mnemonic: "MINImum"
+      operands: [r5900_vfdxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: viadd
+      index: 0x30
+      mnemonic: "Integer ADD"
+      operands: [r5900_vid, r5900_vis, r5900_vit]
+
+    - name: visub
+      index: 0x31
+      mnemonic: "Integer SUBtract"
+      operands: [r5900_vid, r5900_vis, r5900_vit]
+
+    - name: viaddi
+      index: 0x32
+      mnemonic: "Integer ADD Immediate"
+      operands: [r5900_vit, r5900_vis, r5900_immediate5]
+
+    - name: viand
+      index: 0x34
+      mnemonic: "Integer AND"
+      operands: [r5900_vid, r5900_vis, r5900_vit]
+
+    - name: vior
+      index: 0x35
+      mnemonic: "Integer OR"
+      operands: [r5900_vid, r5900_vis, r5900_vit]
+
+    # TODO: operands and properties
+
+    - name: vcallms
+      index: 0x38
+      operands: []
+
+    - name: vcallmsr
+      index: 0x39
+      operands: [r5900_vis]
+
+
+# ------------------------------------------------------------
+  - class: cop2_special2
+    instructions:
+
+    #     31---------26-25-----21-20------------------11-10------6-5-2-1--0
+    #     |  =COP2   | Special2 |                        |  fhi  |1111|flo|
+    #     ------6----------5-----------------------------------------------
+    # Note: opcode is flo | ( fhi << 2).
+
+    #      |--000--|--001--|--010--|--011--|--100--|--101--|--110--|--111--| lo
+    # 0000 |VADDAx |VADDAy |VADDAz |VADDAw |VSUBAx |VSUBAy |VSUBAz |VSUBAw |
+    # 0001 |VMADDAx|VMADDAy|VMADDAz|VMADDAw|VMSUBAx|VMSUBAy|VMSUBAz|VMSUBAw|
+    # 0010 |VITOF0 |VITOF4 |VITOF12|VITOF15|VFTOI0 |VFTOI4 |VFTOI12|VFTOI15|
+    # 0011 |VMULAx |VMULAy |VMULAz |VMULAw |VMULAq |VABS   |VMULAi |VCLIPw |
+    # 0100 |VADDAq |VMADDAq|VADDAi |VMADDAi|VSUBAq |VMSUBAq|VSUBAi |VMSUBAi|
+    # 0101 |VADDA  |VMADDA |VMULA  |  ---  |VSUBA  |VMSUBA |VOPMULA|VNOP   |
+    # 0110 |VMOVE  |VMR32  |  ---  |  ---  |VLQI   |VSQI   |VLQD   |VSQD   |
+    # 0111 |VDIV   |VSQRT  |VRSQRT |VWAITQ |VMTIR  |VMFIR  |VILWR  |VISWR  |
+    # 1000 |VRNEXT |VRGET  |VRINIT |VRXOR  |  ---  |  ---  |  ---  |  ---  |
+    # 1001 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 1010 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 1011 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 1100 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 1101 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 1110 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    # 1111 |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |  ---  |
+    #  hi  |-------|-------|-------|-------|-------|-------|-------|-------|
+
+    # TODO: operands and properties
+
+    - name: vaddax
+      index: 0x00
+      mnemonic: "Add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vadday
+      index: 0x01
+      mnemonic: "Add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vaddaz
+      index: 0x02
+      mnemonic: "Add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vaddaw
+      index: 0x03
+      mnemonic: "Add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubax
+      index: 0x04
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubay
+      index: 0x05
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubaz
+      index: 0x06
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubaw
+      index: 0x07
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddax
+      index: 0x08
+      mnemonic: "Multiply and add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    - name: vmadday
+      index: 0x09
+      mnemonic: "Multiply and add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    - name: vmaddaz
+      index: 0x0A
+      mnemonic: "Multiply and add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    - name: vmaddaw
+      index: 0x0B
+      mnemonic: "Multiply and add accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    - name: vmsubax
+      index: 0x0C
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubay
+      index: 0x0D
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubaz
+      index: 0x0E
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubaw
+      index: 0x0F
+      mnemonic: "Multiply and subtract accumulator broadcast"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: vitof0
+      index: 0x10
+      mnemonic: "Integer to floating point"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vitof4
+      index: 0x11
+      mnemonic: "Integer to floating point"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vitof12
+      index: 0x12
+      mnemonic: "Integer to floating point"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vitof15
+      index: 0x13
+      mnemonic: "Integer to floating point"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vftoi0
+      index: 0x14
+      mnemonic: "Floating to integer"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vftoi4
+      index: 0x15
+      mnemonic: "Floating to integer"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vftoi12
+      index: 0x16
+      mnemonic: "Floating to integer"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vftoi15
+      index: 0x17
+      mnemonic: "Floating to integer"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: vmulax
+      index: 0x18
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    - name: vmulay
+      index: 0x19
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    - name: vmulaz
+      index: 0x1A
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    - name: vmulaw
+      index: 0x1B
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+    # TODO
+
+    - name: vmulaq
+      index: 0x1C
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+
+    - name: vabs
+      index: 0x1D
+      mnemonic: "Absolute"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    # TODO
+
+    - name: vmulai
+      index: 0x1E
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+
+    - name: vclipw
+      index: 0x1F
+      mnemonic: "Clip"
+      operands: [r5900_vfsxyzw, r5900_vftn]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: vaddaq
+      index: 0x20
+      mnemonic: "Add accumulator Q"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddaq
+      index: 0x21
+      mnemonic: "Multiply and add accumulator Q"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vaddai
+      index: 0x22
+      mnemonic: "Add accumulator I"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmaddai
+      index: 0x23
+      mnemonic: "Multiply and add accumulator I"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubaq
+      index: 0x24
+      mnemonic: "Subtract accumulator Q"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubaq
+      index: 0x25
+      mnemonic: "Multiply and Subtract accumulator Q"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_Q]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsubai
+      index: 0x26
+      mnemonic: "Subtract accumulator I"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsubai
+      index: 0x27
+      mnemonic: "Multiply and Subtract accumulator I"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_I]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vadda
+      index: 0x28
+      mnemonic: "Add accumulator"
+      operands: [r5900_ACCxyzw, r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmadda
+      index: 0x29
+      mnemonic: "Multiply and add accumulator"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    # TODO
+
+    - name: vmula
+      index: 0x2A
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+
+
+    - name: vsuba
+      index: 0x2C
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmsuba
+      index: 0x2D
+      mnemonic: "Multiply and subtract accumulator"
+      operands: [r5900_ACCxyzw, r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vopmula
+      index: 0x2E
+      mnemonic: "Outer product pre increment"
+      operands: [r5900_ACCxyzw, r5900_vfsxyzw, r5900_vftxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vnop
+      index: 0x2F
+      mnemonic: "No operation"
+      operands: []
+
+
+    - name: vmove
+      index: 0x30
+      mnemonic: "Move floating point registers"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vmr32
+      index: 0x31
+      mnemonic: "Move and rotate per word"
+      operands: [r5900_vftxyzw, r5900_vfsxyzw]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vlqi
+      index: 0x34
+      mnemonic: "Load quadraword post increment"
+      operands: [r5900_vftxyzw, r5900_vis_postincr]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsqi
+      index: 0x35
+      mnemonic: "Store quadraword post increment"
+      operands: [r5900_vfsxyzw, r5900_vit_postincr]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vlqd
+      index: 0x36
+      mnemonic: "Load quadraword pre decrement"
+      operands: [r5900_vftxyzw, r5900_vis_predecr]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vsqd
+      index: 0x37
+      mnemonic: "Store quadraword pre decrement"
+      operands: [r5900_vfsxyzw, r5900_vit_predecr]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: vdiv
+      index: 0x38
+      operands: [r5900_Q, r5900_vfsl, r5900_vftm]
+
+    - name: vsqrt
+      index: 0x39
+      operands: [r5900_Q, r5900_vftm]
+
+    - name: vrsqrt
+      index: 0x3A
+      operands: [r5900_Q, r5900_vfsl,r5900_vftm]
+
+
+    - name: vwaitq
+      index: 0x3B
+      operands: [0]
+      mnemonic: "Wait Q operation"
+
+
+    - name: vmtir
+      index: 0x3C
+      operands: [r5900_vit, r5900_vfsl]
+
+
+    - name: vmfir
+      index: 0x3D
+      mnemonic: "Move from integer register"
+      operands: [r5900_vftxyzw, r5900_vis]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+
+    - name: vilwr
+      index: 0x3E
+      mnemonic: "Integer load word register"
+      operands: [r5900_vit, r5900_vis]
+      isFloat: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: viswr
+      index: 0x3F
+      mnemonic: "Integer store word register"
+      operands: [r5900_vit, r5900_vis]
+      isFloat: true
+      doesDereference: true
+      doesStore: true
+
+    # "vilwr.w",		r5900_vit,(r5900_vis)
+    # "vilwr.x",		r5900_vit,(r5900_vis)
+    # "vilwr.y",		r5900_vit,(r5900_vis)
+    # "vilwr.z",		r5900_vit,(r5900_vis)
+    # "viswr.w",		r5900_vit,(r5900_vis)
+    # "viswr.x",		r5900_vit,(r5900_vis)
+    # "viswr.y",		r5900_vit,(r5900_vis)
+    # "viswr.z",		r5900_vit,(r5900_vis)
+
+
+    - name: vrnext
+      index: 0x40
+      mnemonic: "R next"
+      operands: [r5900_vftxyzw, r5900_R]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    - name: vrget
+      index: 0x41
+      mnemonic: "R move"
+      operands: [r5900_vftxyzw, r5900_R]
+      instrSuffix: RABINSTRSUFFIX_R5900_xyzw
+      isFloat: true
+
+    # TODO
+
+    - name: vrinit
+      index: 0x42
+      operands: [r5900_R, r5900_vfsl]
+
+    - name: vrxor
+      index: 0x43
+      operands: [r5900_R, r5900_vfsl]
+
+
+# ============================================================
+  - class: userdef
+    instructions:
+    - name: USERDEF_00
+      operands: []
+    - name: USERDEF_01
+      operands: []
+    - name: USERDEF_02
+      operands: []
+    - name: USERDEF_03
+      operands: []
+    - name: USERDEF_04
+      operands: []
+    - name: USERDEF_05
+      operands: []
+    - name: USERDEF_06
+      operands: []
+    - name: USERDEF_07
+      operands: []
+    - name: USERDEF_08
+      operands: []
+    - name: USERDEF_09
+      operands: []
+    - name: USERDEF_10
+      operands: []
+    - name: USERDEF_11
+      operands: []
+    - name: USERDEF_12
+      operands: []
+    - name: USERDEF_13
+      operands: []
+    - name: USERDEF_14
+      operands: []
+    - name: USERDEF_15
+      operands: []
+    - name: USERDEF_16
+      operands: []
+    - name: USERDEF_17
+      operands: []
+    - name: USERDEF_18
+      operands: []
+    - name: USERDEF_19
+      operands: []
+    - name: USERDEF_20
+      operands: []
+
+# ------------------------------------------------------------
+  - instructions:
+    - name: MAX
+      operands: []

@@ -161,6 +161,8 @@ def write_descriptor_table(ys):
                                 )
                             else:
                                 columns_list.append(".{}={{ {} }}".format(k, "0"))
+                        elif k == "accessType":
+                            columns_list.append(f".{k}='RAB_ACCESSTYPE_'{v}")
                         else:
                             # replace Pythonic truth by C truth
                             columns_list.append(f".{k}={v}".replace("=True", "=true"))
@@ -183,7 +185,7 @@ def write_lookup_tables(ys):
 
             set_name = instr_set["set"]  # e.g. core
             for cl in instr_set["classes"]:  # e.g. regimm, may not have a "class" name
-                if not cl.get("class"):
+                if not cl.get("class") or cl["class"] == "user":
                     continue
                 ctype = "{prefix}{name}".format(
                     prefix=RABBITIZER_TYPE_PREFIX,
@@ -200,7 +202,7 @@ def write_lookup_tables(ys):
                 class_instructions = cl["instructions"]
                 for entry in class_instructions:  # actual instruction data
                     index = entry.get("index")
-                    if not index or index < 0:
+                    if index is None or index < 0:
                         continue
                     variant = set_name + "_" + entry["name"]
                     enum_variant = ENUM_NAME.format(

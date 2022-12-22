@@ -13,32 +13,881 @@ instruction_sets:
       operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
 
 
-  # - class: rsp_cop2
-  #   instructions:
+  - class: cop2
+    instructions:
+    
+    # OP cop2t, vd[index]
 
-  # - class: rsp_cop2_vu
-  #   instructions:
+    - name: mfc2
+      index: 0x00
+      operands: [rsp_cop2t, rsp_vs_index]
+
+    - name: mtc2
+      index: 0x04
+      operands: [rsp_cop2t, rsp_vs_index]
+
+    # OP rt, cop2cd
+
+    - name: cfc2
+      index: 0x02
+      operands: [cpu_rt, rsp_cop2cd]
+      modifiesRt: true
+
+    - name: ctc2
+      index: 0x06
+      operands: [cpu_rt, rsp_cop2cd]
+      readsRt: true
 
 
-  # - class: rsp_normal_lwc2
-  #   instructions:
+  - class: cop2_vu
+    instructions:
 
-  # - class: rsp_normal_swc2
-  #   instructions:
+    # OP vd, vs, vt[elementhigh]
 
-  # # CPU instructions but with rsp registers
+    - name: vmulf
+      index: 0x00
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
 
-  # - class: rsp_normal
-  #   instructions:
+    - name: vmulu
+      index: 0x01
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
 
-  # - class: rsp_special
-  #   instructions:
+    - name: vrndp
+      index: 0x02
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
 
-  # - class: rsp_regimm
-  #   instructions:
+    - name: vmulq
+      index: 0x03
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
 
-  # - class: rsp_cop0
-  #   instructions:
+    - name: vmudl
+      index: 0x04
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmudm
+      index: 0x05
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmudn
+      index: 0x06
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmudh
+      index: 0x07
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmacf
+      index: 0x08
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmacu
+      index: 0x09
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vrndn
+      index: 0x0A
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmacq
+      index: 0x0B
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmadl
+      index: 0x0C
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmadm
+      index: 0x0D
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmadn
+      index: 0x0E
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmadh
+      index: 0x0F
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vadd
+      index: 0x10
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vsub
+      index: 0x11
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vabs
+      index: 0x13
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vaddc
+      index: 0x14
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vsubc
+      index: 0x15
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vsar
+      index: 0x1D
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vand
+      index: 0x28
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vnand
+      index: 0x29
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vor
+      index: 0x2A
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vnor
+      index: 0x2B
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vxor
+      index: 0x2C
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vnxor
+      index: 0x2D
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+
+    - name: vlt
+      index: 0x20
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: veq
+      index: 0x21
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vne
+      index: 0x22
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vge
+      index: 0x23
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vcl
+      index: 0x24
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vch
+      index: 0x25
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vcr
+      index: 0x26
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    - name: vmrg
+      index: 0x27
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+    # OP vd[de], vt[elementhigh]
+
+    - name: vrcp
+      index: 0x30
+      operands: [rsp_vd_de, rsp_vt_elementhigh]
+
+    - name: vrcpl
+      index: 0x31
+      # operands may be wrong
+      operands: [rsp_vd_de, rsp_vt_elementhigh]
+
+    - name: vrcph
+      index: 0x32
+      operands: [rsp_vd_de, rsp_vt_elementhigh]
+
+    - name: vmov
+      index: 0x33
+      operands: [rsp_vd_de, rsp_vt_elementhigh]
+
+    - name: vrsq
+      index: 0x34
+      operands: [rsp_vd_de, rsp_vt_elementhigh]
+
+    - name: vrsql
+      index: 0x35
+      operands: [rsp_vd_de, rsp_vt_elementhigh]
+
+    - name: vrsqh
+      index: 0x36
+      operands: [rsp_vd_de, rsp_vt_elementhigh]
+
+    # OP
+
+    - name: vnop
+      index: 0x37
+      operands: []
+
+
+  - class: normal_lwc2
+    instructions:
+
+    # OP vt[elementlow], offset(vs
+
+    - name: lbv
+      index: 0x00
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: lsv
+      index: 0x01
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: llv
+      index: 0x02
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: ldv
+      index: 0x03
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: lqv
+      index: 0x04
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: lrv
+      index: 0x05
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: lpv
+      index: 0x06
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: luv
+      index: 0x07
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: lhv
+      index: 0x08
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: lfv
+      index: 0x09
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: ltv
+      index: 0x0B
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+
+  - class: normal_swc2
+    instructions:
+
+    # OP vt[elementlow], offset(vs
+
+    - name: sbv
+      index: 0x00
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: ssv
+      index: 0x01
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: slv
+      index: 0x02
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: sdv
+      index: 0x03
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: sqv
+      index: 0x04
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: srv
+      index: 0x05
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: spv
+      index: 0x06
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: suv
+      index: 0x07
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: shv
+      index: 0x08
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: sfv
+      index: 0x09
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+    - name: stv
+      index: 0x0B
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+
+    - name: swv
+      index: -0x07
+      operands: [rsp_vt_elementlow, rsp_offset_rs]
+      readsRs: true
+
+
+  # CPU instructions but with rsp registers
+
+  - class: normal
+    instructions:
+
+    # OP LABEL
+
+    - name: j
+      index: 0x02
+      mnemonic: "Jump"
+      operands: [cpu_label]
+      isJump: true
+      isJumpWithAddress: true
+
+    - name: jal
+      index: 0x03
+      mnemonic: "Jump And Link"
+      operands: [cpu_label]
+      isJump: true
+      isJumpWithAddress: true
+      doesLink: true
+
+    # OP rs, rt, IMM
+
+    - name: beq
+      index: 0x04
+      mnemonic: "Branch on EQual"
+      operands: [rsp_rs, rsp_rt, cpu_branch_target_label]
+      readsRs: true
+      readsRt: true
+      isBranch: true
+
+    - name: bne
+      index: 0x05
+      mnemonic: "Branch on Not Equal"
+      operands: [rsp_rs, rsp_rt, cpu_branch_target_label]
+      readsRs: true
+      readsRt: true
+      isBranch: true
+
+    # OP rs, IMM
+
+    - name: blez
+      index: 0x06
+      mnemonic: "Branch on Less than or Equal to Zero"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+
+    - name: bgtz
+      index: 0x07
+      mnemonic: "Branch on Greater Than Zero"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+
+    # OP rt, rs, IMM
+
+    - name: addi
+      index: 0x08
+      mnemonic: "Add Immediate"
+      operands: [rsp_rt, rsp_rs, cpu_immediate]
+      modifiesRt: true
+      readsRs: true
+      notEmitedByCompilers: true
+      canBeLo: true
+
+    - name: addiu
+      index: 0x09
+      mnemonic: "Add Immediate Unsigned Word"
+      operands: [rsp_rt, rsp_rs, cpu_immediate]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+
+    - name: slti
+      index: 0x0A
+      mnemonic: "Set on Less Than Immediate"
+      operands: [rsp_rt, rsp_rs, cpu_immediate]
+      modifiesRt: true
+      readsRs: true
+
+    - name: sltiu
+      index: 0x0B
+      mnemonic: "Set on Less Than Immediate Unsigned"
+      operands: [rsp_rt, rsp_rs, cpu_immediate]
+      modifiesRt: true
+      readsRs: true
+
+    - name: andi
+      index: 0x0C
+      mnemonic: "And Immediate"
+      operands: [rsp_rt, rsp_rs, cpu_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      readsRs: true
+
+    - name: ori
+      index: 0x0D
+      mnemonic: "Or Immediate"
+      operands: [rsp_rt, rsp_rs, cpu_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+
+    - name: xori
+      index: 0x0E
+      mnemonic: "eXclusive OR Immediate"
+      operands: [rsp_rt, rsp_rs, cpu_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      readsRs: true
+
+    # OP rt, IMM
+
+    - name: lui
+      index: 0x0F
+      mnemonic: "Load Upper Immediate"
+      operands: [rsp_rt, cpu_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      canBeHi: true
+
+    # OP rt, IMM(base)
+
+    - name: lb
+      index: 0x20
+      mnemonic: "Load Byte"
+      operands: [rsp_rt, rsp_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: BYTE
+
+    - name: lh
+      index: 0x21
+      mnemonic: "Load Halfword"
+      operands: [rsp_rt, rsp_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: SHORT
+
+    - name: lw
+      index: 0x23
+      mnemonic: "Load Word"
+      operands: [rsp_rt, rsp_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: WORD
+
+    - name: lbu
+      index: 0x24
+      mnemonic: "Load Byte Insigned"
+      operands: [rsp_rt, rsp_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: BYTE
+      doesUnsignedMemoryAccess: true
+
+    - name: lhu
+      index: 0x25
+      mnemonic: "Load Halfword Unsigned"
+      operands: [rsp_rt, rsp_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: SHORT
+      doesUnsignedMemoryAccess: true
+
+    - name: sb
+      index: 0x28
+      mnemonic: "Store Byte"
+      operands: [rsp_rt, rsp_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: BYTE
+
+    - name: sh
+      index: 0x29
+      mnemonic: "Store Halfword"
+      operands: [rsp_rt, rsp_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: SHORT
+
+    - name: sw
+      index: 0x2B
+      mnemonic: "Store Word"
+      operands: [rsp_rt, rsp_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: WORD
+
+    - name: pref
+      index: 0x33
+      mnemonic: "Prefetch"
+      operands: [rsp_rt, rsp_immediate_base]
+      readsRs: true
+      readsRt: true
+
+
+    # Pseudo-Instruction Unique IDs
+
+    # OP IMM
+
+    - name: b
+      index: -0x03
+      mnemonic: "Branch (unconditional)"
+      operands: [cpu_branch_target_label]
+      isBranch: true
+
+    # OP rs, IMM
+
+    - name: beqz
+      index: -0x04
+      mnemonic: "Branch on EQual Zero"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+
+    - name: bnez
+      index: -0x05
+      mnemonic: "Branch on Not Equal Zero"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+
+
+  - class: special
+    instructions:
+
+    # OP rd, rt, sa
+
+    - name: sll
+      index: 0x00
+      mnemonic: "Shift word Left Logical"
+      operands: [rsp_rd, rsp_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: srl
+      index: 0x02
+      mnemonic: "Shift word Right Logical"
+      operands: [rsp_rd, rsp_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: sra
+      index: 0x03
+      mnemonic: "Shift word Right Arithmetic"
+      operands: [rsp_rd, rsp_rt, cpu_sa]
+      modifiesRd: true
+      readsRt: true
+
+    # OP rd, rt, rs
+
+    - name: sllv
+      index: 0x04
+      mnemonic: "Shift word Left Logical Variable"
+      operands: [rsp_rd, rsp_rt, rsp_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: srlv
+      index: 0x06
+      mnemonic: "Shift word Right Logical Variable"
+      operands: [rsp_rd, rsp_rt, rsp_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: srav
+      index: 0x07
+      mnemonic: "Shift word Right Arithmetic Variable"
+      operands: [rsp_rd, rsp_rt, rsp_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    # OP rs
+
+    - name: jr
+      index: 0x08
+      mnemonic: "Jump Register"
+      operands: [rsp_rs]
+      readsRs: true
+      isJump: true
+
+    - name: jalr
+      index: 0x09
+      mnemonic: "Jump And Link Register"
+      operands: [rsp_maybe_rd_rs]
+      isJump: true
+      modifiesRd: true
+      readsRs: true
+      doesLink: true
+
+    # OP rd, rs, rt
+
+    - name: movz
+      index: 0x0A
+      mnemonic: "MOVe conditional on Zero"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: movn
+      index: 0x0B
+      mnemonic: "MOVe conditional on Not zero"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+
+    - name: add
+      index: 0x20
+      mnemonic: "ADD word"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+      notEmitedByCompilers: true
+
+    - name: addu
+      index: 0x21
+      mnemonic: "ADD Unsigned word"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: sub
+      index: 0x22
+      mnemonic: "Subtract word"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: subu
+      index: 0x23
+      mnemonic: "SUBtract Unsigned word"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: and
+      index: 0x24
+      mnemonic: "AND"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: or
+      index: 0x25
+      mnemonic: "OR"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: xor
+      index: 0x26
+      mnemonic: "eXclusive OR"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: nor
+      index: 0x27
+      mnemonic: "Not OR"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: slt
+      index: 0x2A
+      mnemonic: "Set on Less Than"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: sltu
+      index: 0x2B
+      mnemonic: "Set on Less Than Unsigned"
+      operands: [rsp_rd, rsp_rs, rsp_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    # OP code
+
+    - name: break
+      index: 0x0D
+      mnemonic: "Break"
+      operands: [cpu_code]
+
+
+    # Pseudo-Instruction Unique IDs
+
+    # OP
+
+    - name: nop
+      index: -0x01
+      mnemonic: "No OPeration"
+      operands: [0]
+      isPseudo: true
+
+    # OP rd, rs
+
+    - name: move
+      index: -0x25
+      mnemonic: "Move"
+      operands: [rsp_rd, rsp_rs]
+      modifiesRd: true
+      readsRs: true
+      isPseudo: true
+
+    - name: not
+      index: -0x27
+      mnemonic: "Not"
+      operands: [rsp_rd, rsp_rs]
+      modifiesRd: true
+      readsRs: true
+      isPseudo: true
+
+    # OP rd, rt
+
+    - name: negu
+      index: -0x23
+      operands: [rsp_rd, rsp_rt]
+      modifiesRd: true
+      readsRt: true
+      isPseudo: true
+
+
+  - class: regimm
+    instructions:
+
+    # OP rs, IMM
+
+    - name: bltz
+      index: 0x00
+      mnemonic: "Branch on Less Than Zero"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+
+    - name: bgez
+      index: 0x01
+      mnemonic: "Branch on Greater than or Equal to Zero"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+
+
+    - name: bltzal
+      index: 0x10
+      mnemonic: "Branch on Less Than Zero and Link"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+      doesLink: true
+
+    - name: bgezal
+      index: 0x11
+      mnemonic: "Branch on Greater Than or Equal to Zero and Link"
+      operands: [rsp_rs, cpu_branch_target_label]
+      readsRs: true
+      isBranch: true
+      doesLink: true
+
+
+    # Pseudo-Instruction Unique IDs
+
+    - name: bal
+      index: -0x11
+      mnemonic: "Branch and Link"
+      operands: [cpu_branch_target_label]
+      isBranch: true
+      doesLink: true
+      isPseudo: true
+
+
+  - class: cop0
+    instructions:
+
+    # OP rt, cop0d
+
+    - name: mfc0
+      index: 0x00
+      mnemonic: "Move word From CP0"
+      operands: [rsp_rt, rsp_cop0d]
+      modifiesRt: true
+      notEmitedByCompilers: true
+
+    - name: mtc0
+      index: 0x04
+      mnemonic: "Move word to CP0"
+      operands: [rsp_rt, rsp_cop0d]
+      readsRt: true
+      notEmitedByCompilers: true
 
 
   - class: user
