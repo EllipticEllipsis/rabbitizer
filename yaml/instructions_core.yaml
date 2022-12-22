@@ -5,1992 +5,2050 @@
 #! @note: `index` can come from various parts of the instruction word, it is used for lookup in the appropriate table; 
 #! it is assumed that the code already knows which this is.
 ---
-cpu:
-- class: normal
-  data:
-
-  # OP LABEL
-
-  - name: j
-    index: 0x02
-    mnemonic: "Jump"
-    operands: [cpu_label]
-    isJump: true
-    isJumpWithAddress: true
-
-  - name: jal
-    index: 0x03
-    mnemonic: "Jump And Link"
-    operands: [cpu_label]
-    isJump: true
-    isJumpWithAddress: true
-    doesLink: true
-
-  # OP rs, rt, IMM
-
-  - name: beq
-    index: 0x04
-    mnemonic: "Branch on EQual"
-    operands: [cpu_rs, cpu_rt, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-    readsRt: true
-
-  - name: bne
-    index: 0x05
-    mnemonic: "Branch on Not Equal"
-    operands: [cpu_rs, cpu_rt, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-    readsRt: true
-
-  - name: beql
-    index: 0x14
-    mnemonic: "Branch on EQual Likely"
-    operands: [cpu_rs, cpu_rt, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-    readsRt: true
-
-  - name: bnel
-    index: 0x15
-    mnemonic: "Branch on Not Equal Likely"
-    operands: [cpu_rs, cpu_rt, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-    readsRt: true
-
-  # OP rs, IMM
-
-  - name: blez
-    index: 0x06
-    mnemonic: "Branch on Less than or Equal to Zero"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-
-  - name: blezl
-    index: 0x16
-    mnemonic: "Branch on Less than or Equal to Zero Likely"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-
-  - name: bgtz
-    index: 0x07
-    mnemonic: "Branch on Greater Than Zero"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-
-  - name: bgtzl
-    index: 0x17
-    mnemonic: "Branch on Greater Than Zero Likely"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-
-  # OP rt, rs, IMM
-
-  - name: addi
-    index: 0x08
-    mnemonic: "Add Immediate"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    modifiesRt: true
-    readsRs: true
-    notEmitedByCompilers: true
-    canBeLo: true
-
-  - name: addiu
-    index: 0x09
-    mnemonic: "Add Immediate Unsigned Word"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-
-  - name: slti
-    index: 0x0A
-    mnemonic: "Set on Less Than Immediate"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    modifiesRt: true
-    readsRs: true
-
-  - name: sltiu
-    index: 0x0B
-    mnemonic: "Set on Less Than Immediate Unsigned"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    modifiesRt: true
-    readsRs: true
-
-  - name: andi
-    index: 0x0C
-    mnemonic: "And Immediate"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    isUnsigned: true
-    modifiesRt: true
-    readsRs: true
-
-  - name: ori
-    index: 0x0D
-    mnemonic: "Or Immediate"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    isUnsigned: true
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-
-  - name: xori
-    index: 0x0E
-    mnemonic: "eXclusive OR Immediate"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    isUnsigned: true
-    modifiesRt: true
-    readsRs: true
-
-  - name: daddi
-    index: 0x18
-    mnemonic: "Doubleword add Immediate"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-
-  - name: daddiu
-    index: 0x19
-    mnemonic: "Doubleword add Immediate Unsigned"
-    operands: [cpu_rt, cpu_rs, cpu_immediate]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-
-  # OP rt, IMM
-
-  - name: lui
-    index: 0x0F
-    mnemonic: "Load Upper Immediate"
-    operands: [cpu_rt, cpu_immediate]
-    isUnsigned: true
-    modifiesRt: true
-    canBeHi: true
-
-  # OP rt, IMM(base)
-
-  - name: ldl
-    index: 0x1A
-    mnemonic: "Load Doubleword Left"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: ldr
-    index: 0x1B
-    mnemonic: "Load Doubleword Right"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: lb
-    index: 0x20
-    mnemonic: "Load Byte"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: BYTE
-
-  - name: lh
-    index: 0x21
-    mnemonic: "Load Halfword"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: SHORT
-
-  - name: lwl
-    index: 0x22
-    mnemonic: "Load Word Left"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: lw
-    index: 0x23
-    mnemonic: "Load Word"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: WORD
-
-  - name: lbu
-    index: 0x24
-    mnemonic: "Load Byte Insigned"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: BYTE
-    doesUnsignedMemoryAccess: true
-
-  - name: lhu
-    index: 0x25
-    mnemonic: "Load Halfword Unsigned"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: SHORT
-    doesUnsignedMemoryAccess: true
-
-  - name: lwr
-    index: 0x26
-    mnemonic: "Load Word Right"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: lwu
-    index: 0x27
-    mnemonic: "Load Word Unsigned"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: WORD
-    doesUnsignedMemoryAccess: true
-
-  - name: sb
-    index: 0x28
-    mnemonic: "Store Byte"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-    accessType: BYTE
-
-  - name: sh
-    index: 0x29
-    mnemonic: "Store Halfword"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-    accessType: SHORT
-
-  - name: swl
-    index: 0x2A
-    mnemonic: "Store Word Left"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-  - name: sw
-    index: 0x2B
-    mnemonic: "Store Word"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-    accessType: WORD
-
-  - name: sdl
-    index: 0x2C
-    mnemonic: "Store Doubleword Left"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-  - name: sdr
-    index: 0x2D
-    mnemonic: "Store Doubleword Right"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-  - name: swr
-    index: 0x2E
-    mnemonic: "Store Word Right"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-  - name: ll
-    index: 0x30
-    mnemonic: "Load Linked word"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: pref
-    index: 0x33
-    mnemonic: "Prefetch"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-
-  - name: lld
-    index: 0x34
-    mnemonic: "Load Linked Doubleword"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: ld
-    index: 0x37
-    mnemonic: "Load Doubleword"
-    operands: [cpu_rt, cpu_immediate_base]
-    modifiesRt: true
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: DOUBLEWORD
-
-  - name: sc
-    index: 0x38
-    mnemonic: "Store Conditional word"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-  - name: scd
-    index: 0x3C
-    mnemonic: "Store Conditional Doubleword"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-  - name: sd
-    index: 0x3F
-    mnemonic: "Store Doubleword"
-    operands: [cpu_rt, cpu_immediate_base]
-    readsRs: true
-    readsRt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-    accessType: DOUBLEWORD
-
-  # OP op, IMM(base)
-
-  - name: cache
-    index: 0x2F
-    mnemonic: "Cache"
-    operands: [cpu_op, cpu_immediate_base]
-    readsRs: true
-    notEmitedByCompilers: true
-
-  # OP ft, IMM(base)
-
-  - name: lwc1
-    index: 0x31
-    mnemonic: "Load Word to Coprocessor z"
-    operands: [cpu_ft, cpu_immediate_base]
-    isFloat: true
-    readsRs: true
-    modifiesFt: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: FLOAT
-
-  - name: ldc1
-    index: 0x35
-    mnemonic: "Load Doubleword to Coprocessor z"
-    operands: [cpu_ft, cpu_immediate_base]
-    isFloat: true
-    isDouble: true
-    readsRs: true
-    modifiesFt: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-    accessType: DOUBLEFLOAT
-
-  - name: swc1
-    index: 0x39
-    mnemonic: "Store Word from Coprocessor z"
-    operands: [cpu_ft, cpu_immediate_base]
-    isFloat: true
-    readsRs: true
-    readsFt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-    accessType: FLOAT
-
-  - name: sdc1
-    index: 0x3D
-    mnemonic: "Store Doubleword from Coprocessor z"
-    operands: [cpu_ft, cpu_immediate_base]
-    isFloat: true
-    isDouble: true
-    readsRs: true
-    readsFt: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-    accessType: DOUBLEFLOAT
-
-  # OP cop2t, IMM(base)
-
-  - name: lwc2
-    index: 0x32
-    mnemonic: "Load Word to Coprocessor z"
-    operands: [cpu_cop2t, cpu_immediate_base]
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: ldc2
-    index: 0x36
-    mnemonic: "Load Doubleword to Coprocessor z"
-    operands: [cpu_cop2t, cpu_immediate_base]
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesLoad: true
-
-  - name: swc2
-    index: 0x3A
-    mnemonic: "Store Word from Coprocessor z"
-    operands: [cpu_cop2t, cpu_immediate_base]
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-  - name: sdc2
-    index: 0x3E
-    mnemonic: "Store Doubleword from Coprocessor z"
-    operands: [cpu_cop2t, cpu_immediate_base]
-    readsRs: true
-    canBeLo: true
-    doesDereference: true
-    doesStore: true
-
-
-  # Pseudo-Instruction Unique IDs
-
-  # OP IMM
-
-  - name: b
-    index: -0x03
-    mnemonic: "Branch (unconditional)"
-    operands: [cpu_branch_target_label]
-    isBranch: true
-    isPseudo: true
-
-  # OP rs, IMM
-
-  - name: beqz
-    index: -0x04
-    mnemonic: "Branch on EQual Zero"
-    operands: [cpu_rs, cpu_branch_target_label]
-    readsRs: true
-    isBranch: true
-    isPseudo: true
-
-  - name: bnez
-    index: -0x05
-    mnemonic: "Branch on Not Equal Zero"
-    operands: [cpu_rs, cpu_branch_target_label]
-    readsRs: true
-    isBranch: true
-    isPseudo: true
-
-
-- class: special
-  data:
-
-  # OP rd, rt, sa
-
-  - name: sll
-    index: 0x00
-    mnemonic: "Shift word Left Logical"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: srl
-    index: 0x02
-    mnemonic: "Shift word Right Logical"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: sra
-    index: 0x03
-    mnemonic: "Shift word Right Arithmetic"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: dsll
-    index: 0x38
-    mnemonic: "Doubleword Shift Left Logical"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: dsrl
-    index: 0x3A
-    mnemonic: "Doubleword Shift Right Logical"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: dsra
-    index: 0x3B
-    mnemonic: "Doubleword Shift Right Arithmetic"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: dsll32
-    index: 0x3C
-    mnemonic: "Doubleword Shift Left Logical plus 32"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: dsrl32
-    index: 0x3E
-    mnemonic: "Doubleword Shift Right Logical plus 32"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  - name: dsra32
-    index: 0x3F
-    mnemonic: "Doubleword Shift Right Arithmetic plus 32"
-    operands: [cpu_rd, cpu_rt, cpu_sa]
-    modifiesRd: true
-    readsRt: true
-
-  # OP rd, rt, rs
-
-  - name: dsllv
-    index: 0x14
-    mnemonic: "Doubleword Shift Left Logical Variable"
-    operands: [cpu_rd, cpu_rt, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: dsrlv
-    index: 0x16
-    mnemonic: "Doubleword Shift Right Logical Variable"
-    operands: [cpu_rd, cpu_rt, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: dsrav
-    index: 0x17
-    mnemonic: "Doubleword Shift Right Arithmetic Variable"
-    operands: [cpu_rd, cpu_rt, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: sllv
-    index: 0x04
-    mnemonic: "Shift word Left Logical Variable"
-    operands: [cpu_rd, cpu_rt, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: srlv
-    index: 0x06
-    mnemonic: "Shift word Right Logical Variable"
-    operands: [cpu_rd, cpu_rt, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: srav
-    index: 0x07
-    mnemonic: "Shift word Right Arithmetic Variable"
-    operands: [cpu_rd, cpu_rt, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  # OP rs
-
-  - name: mthi
-    index: 0x11
-    mnemonic: "Move To HI register"
-    operands: [cpu_rs]
-    readsRs: true
-    modifiesHI: true
-
-  - name: mtlo
-    index: 0x13
-    mnemonic: "Move To LO register"
-    operands: [cpu_rs]
-    readsRs: true
-    modifiesLO: true
-
-  - name: jr
-    index: 0x08
-    mnemonic: "Jump Register"
-    operands: [cpu_rs]
-    readsRs: true
-    isJump: true
-
-  - name: jalr
-    index: 0x09
-    mnemonic: "Jump And Link Register"
-    operands: [cpu_maybe_rd_rs]
-    isJump: true
-    modifiesRd: true
-    readsRs: true
-    doesLink: true
-
-  # OP rd
-
-  - name: mfhi
-    index: 0x10
-    mnemonic: "Move From HI register"
-    operands: [cpu_rd]
-    modifiesRd: true
-    readsHI: true
-
-  - name: mflo
-    index: 0x12
-    mnemonic: "Move From LO register"
-    operands: [cpu_rd]
-    modifiesRd: true
-    readsLO: true
-
-  # OP rd, rs, rt
-
-  - name: movz
-    index: 0x0A
-    mnemonic: "MOVe conditional on Zero"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: movn
-    index: 0x0B
-    mnemonic: "MOVe conditional on Not zero"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: div
-    index: 0x1A
-    mnemonic: "DIVide word"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    readsRd: true
-    modifiesHI: true
-    modifiesLO: true
-
-  - name: divu
-    index: 0x1B
-    mnemonic: "DIVide Unsigned word"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    readsRd: true
-    modifiesHI: true
-    modifiesLO: true
-
-  - name: sn64_div
-    index: -0x1A
-    mnemonic: "DIVide word"
-    operands: [cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    modifiesHI: true
-    modifiesLO: true
-
-  - name: sn64_divu
-    index: -0x1B
-    mnemonic: "DIVide Unsigned word"
-    operands: [cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    modifiesHI: true
-    modifiesLO: true
-
-
-  - name: ddiv
-    index: 0x1E
-    mnemonic: "Doubleword DIVide"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    readsRd: true
-    modifiesHI: true
-    modifiesLO: true
-
-  - name: ddivu
-    index: 0x1F
-    mnemonic: "Doubleword DIVide Unsigned"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    readsRd: true
-    modifiesHI: true
-    modifiesLO: true
-
-  # - name: ddiv
-  #   index: 
-  #   operands: [cpu_rs, cpu_rt]
-  #   readsRs: true
-  #   readsRt: true
-  #   modifiesHI: true
-  #   modifiesLO: true
-
-  # - name: ddivu
-  #   index: 
-  #   operands: [cpu_rs, cpu_rt]
-  #   readsRs: true
-  #   readsRt: true
-  #   modifiesHI: true
-  #   modifiesLO: true
-
-  - name: add
-    index: 0x20
-    mnemonic: "ADD word"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-    notEmitedByCompilers: true
-
-  - name: addu
-    index: 0x21
-    mnemonic: "ADD Unsigned word"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-    maybeIsMove: true
-
-  - name: sub
-    index: 0x22
-    mnemonic: "Subtract word"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: subu
-    index: 0x23
-    mnemonic: "SUBtract Unsigned word"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: and
-    index: 0x24
-    mnemonic: "AND"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: or
-    index: 0x25
-    mnemonic: "OR"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    maybeIsMove: true
-    readsRs: true
-    readsRt: true
-
-  - name: xor
-    index: 0x26
-    mnemonic: "eXclusive OR"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: nor
-    index: 0x27
-    mnemonic: "Not OR"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: slt
-    index: 0x2A
-    mnemonic: "Set on Less Than"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: sltu
-    index: 0x2B
-    mnemonic: "Set on Less Than Unsigned"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: dadd
-    index: 0x2C
-    mnemonic: "Doubleword Add"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: daddu
-    index: 0x2D
-    mnemonic: "Doubleword Add Unsigned"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-    maybeIsMove: true
-
-  - name: dsub
-    index: 0x2E
-    mnemonic: "Doubleword SUBtract"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  - name: dsubu
-    index: 0x2F
-    mnemonic: "Doubleword SUBtract Unsigned"
-    operands: [cpu_rd, cpu_rs, cpu_rt]
-    modifiesRd: true
-    readsRs: true
-    readsRt: true
-
-  # OP code
-
-  - name: syscall
-    index: 0x0C
-    mnemonic: "SYStem CALL"
-    operands: [cpu_code]
-
-  - name: break
-    index: 0x0D
-    mnemonic: "Break"
-    operands: [cpu_code]
-
-  - name: sync
-    index: 0x0F
-    mnemonic: "Sync"
-    operands: [0]
-
-  # OP rs, rt
-
-  - name: mult
-    index: 0x18
-    mnemonic: "MULTtiply word"
-    operands: [cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    modifiesHI: true
-    modifiesLO: true
-
-  - name: multu
-    index: 0x19
-    mnemonic: "MULTtiply Unsigned word"
-    operands: [cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    modifiesHI: true
-    modifiesLO: true
-
-  - name: dmult
-    index: 0x1C
-    mnemonic: "Doubleword MULTiply"
-    operands: [cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    modifiesHI: true
-    modifiesLO: true
-
-  - name: dmultu
-    index: 0x1D
-    mnemonic: "Doubleword MULTiply Unsigned"
-    operands: [cpu_rs, cpu_rt]
-    readsRs: true
-    readsRt: true
-    modifiesHI: true
-    modifiesLO: true
-
-
-  - name: tge
-    index: 0x30
-    mnemonic: "Trap if Greater or Equal"
-    operands: [cpu_rs, cpu_rt, cpu_code_lower]
-    readsRs: true
-    readsRt: true
-    isTrap: true
-
-  - name: tgeu
-    index: 0x31
-    mnemonic: "Trap if Greater or Equal Unsigned"
-    operands: [cpu_rs, cpu_rt, cpu_code_lower]
-    readsRs: true
-    readsRt: true
-    isTrap: true
-
-  - name: tlt
-    index: 0x32
-    mnemonic: "Trap if Less Than"
-    operands: [cpu_rs, cpu_rt, cpu_code_lower]
-    readsRs: true
-    readsRt: true
-    isTrap: true
-
-  - name: tltu
-    index: 0x33
-    mnemonic: "Trap if Less Than Unsigned"
-    operands: [cpu_rs, cpu_rt, cpu_code_lower]
-    readsRs: true
-    readsRt: true
-    isTrap: true
-
-  - name: teq
-    index: 0x34
-    mnemonic: "Trap if EQual"
-    operands: [cpu_rs, cpu_rt, cpu_code_lower]
-    readsRs: true
-    readsRt: true
-    isTrap: true
-
-  - name: tne
-    index: 0x36
-    mnemonic: "Trap if Not Equal"
-    operands: [cpu_rs, cpu_rt, cpu_code_lower]
-    readsRs: true
-    readsRt: true
-    isTrap: true
-
-
-  # Pseudo-Instruction Unique IDs
-
-  # OP
-
-  - name: nop
-    index: -0x01
-    mnemonic: "No OPeration"
-    operands: []
-    isPseudo: true
-
-  # OP rd, rs
-
-  - name: move
-    index: -0x25
-    mnemonic: "Move"
-    operands: [cpu_rd, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    maybeIsMove: true
-    isPseudo: true
-
-  - name: not
-    index: -0x27
-    mnemonic: "Not"
-    operands: [cpu_rd, cpu_rs]
-    modifiesRd: true
-    readsRs: true
-    isPseudo: true
-
-  # OP rd, rt
-
-  - name: negu
-    index: -0x23
-    operands: [cpu_rd, cpu_rt]
-    modifiesRd: true
-    readsRt: true
-    isPseudo: true
-
-
-- class: regimm
-  data:
-
-  # OP rs, IMM
-
-  - name: bltz
-    index: 0x00
-    mnemonic: "Branch on Less Than Zero"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-
-  - name: bgez
-    index: 0x01
-    mnemonic: "Branch on Greater than or Equal to Zero"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-
-  - name: bltzl
-    index: 0x02
-    mnemonic: "Branch on Less Than Zero Likely"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-
-  - name: bgezl
-    index: 0x03
-    mnemonic: "Branch on Greater than or Equal to Zero Likely"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-
-
-  - name: tgei
-    index: 0x08
-    operands: [cpu_rs, cpu_immediate]
-    isTrap: true
-    readsRs: true
-
-  - name: tgeiu
-    index: 0x09
-    operands: [cpu_rs, cpu_immediate]
-    isTrap: true
-    readsRs: true
-
-  - name: tlti
-    index: 0x0A
-    operands: [cpu_rs, cpu_immediate]
-    isTrap: true
-    readsRs: true
-
-  - name: tltiu
-    index: 0x0B
-    operands: [cpu_rs, cpu_immediate]
-    isTrap: true
-    readsRs: true
-
-  - name: teqi
-    index: 0x0C
-    operands: [cpu_rs, cpu_immediate]
-    isTrap: true
-    readsRs: true
-
-  - name: tnei
-    index: 0x0E
-    operands: [cpu_rs, cpu_immediate]
-    isTrap: true
-    readsRs: true
-
-
-  - name: bltzal
-    index: 0x10
-    mnemonic: "Branch on Less Than Zero and Link"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-    doesLink: true
-
-  - name: bgezal
-    index: 0x11
-    mnemonic: "Branch on Greater Than or Equal to Zero and Link"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    readsRs: true
-    doesLink: true
-
-  - name: bltzall
-    index: 0x12
-    mnemonic: "Branch on Less Than Zero and Link Likely"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-    doesLink: true
-
-  - name: bgezall
-    index: 0x13
-    mnemonic: "Branch on Greater Than or Equal to Zero and Link Likely"
-    operands: [cpu_rs, cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-    readsRs: true
-    doesLink: true
-
-
-  # Pseudo-Instruction Unique IDs
-
-  - name: bal
-    index: -0x11
-    mnemonic: "Branch and Link"
-    operands: [cpu_branch_target_label]
-    isBranch: true
-    doesLink: true
-    isPseudo: true
-
-
-- class: cop0
-  data:
-
-  # OP rt, cop0d
-
-  - name: mfc0
-    index: 0x00
-    mnemonic: "Move word From CP0"
-    operands: [cpu_rt, cpu_cop0d]
-    modifiesRt: true
-    notEmitedByCompilers: true
-
-  - name: dmfc0
-    index: 0x01
-    mnemonic: "Doubleword Move From CP0"
-    operands: [cpu_rt, cpu_cop0d]
-    modifiesRt: true
-
-  - name: cfc0
-    index: 0x02
-    mnemonic: "Move control word From CP0"
-    operands: [cpu_rt, cpu_cop0d]
-    modifiesRt: true
-
-  - name: mtc0
-    index: 0x04
-    mnemonic: "Move word to CP0"
-    operands: [cpu_rt, cpu_cop0d]
-    readsRt: true
-    notEmitedByCompilers: true
-
-  - name: dmtc0
-    index: 0x05
-    mnemonic: "Doubleword Move To CP0"
-    operands: [cpu_rt, cpu_cop0d]
-    readsRt: true
-
-  - name: ctc0
-    index: 0x06
-    mnemonic: "Move control word To CP0"
-    operands: [cpu_rt, cpu_cop0d]
-    readsRt: true
-
-
-- class: cop0_bc0
-  data:
-
-  # OP IMM
-
-  - name: bc0f
-    index: 0x00
-    mnemonic: "Branch on FP False"
-    operands: [cpu_branch_target_label]
-    isBranch: true
-
-  - name: bc0t
-    index: 0x01
-    mnemonic: "Branch on FP True"
-    operands: [cpu_branch_target_label]
-    isBranch: true
-
-  - name: bc0fl
-    index: 0x02
-    mnemonic: "Branch on FP False Likely"
-    operands: [cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-
-  - name: bc0tl
-    index: 0x03
-    mnemonic: "Branch on FP True Likely"
-    operands: [cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-
-
-- class: cop0_tlb
-  data:
-
-  # OP
-
-  - name: tlbr
-    index: 0x01
-    mnemonic: "Read Indexed TLB Entry"
-    operands: []
-    notEmitedByCompilers: true
-
-  - name: tlbwi
-    index: 0x02
-    mnemonic: "Write Indexed TLB Entry"
-    operands: []
-    notEmitedByCompilers: true
-
-  - name: tlbwr
-    index: 0x06
-    mnemonic: "Write Random TLB Entry"
-    operands: []
-
-  - name: tlbp
-    index: 0x08
-    mnemonic: "Probe TLB for Matching Entry"
-    operands: []
-    notEmitedByCompilers: true
-
-  - name: eret
-    index: 0x18
-    mnemonic: "Return from Exception"
-    operands: []
-    notEmitedByCompilers: true
-
-
-- class: cop1
-  data:
-
-  # OP rt, fs
-
-  - name: mfc1
-    index: 0x00
-    mnemonic: "Move Word From Floating-Point"
-    operands: [cpu_rt, cpu_fs]
-    isFloat: true
-    modifiesRt: true
-    readsFs: true
-
-  - name: dmfc1
-    index: 0x01
-    mnemonic: "Doubleword Move From Floating-Point"
-    operands: [cpu_rt, cpu_fs]
-    isFloat: true
-    modifiesRt: true
-    readsFs: true
-
-  - name: mtc1
-    index: 0x04
-    mnemonic: "Move Word to Floating-Point"
-    operands: [cpu_rt, cpu_fs]
-    isFloat: true
-    readsRt: true
-    modifiesFs: true
-
-  - name: dmtc1
-    index: 0x05
-    mnemonic: "Doubleword Move To Floating-Point"
-    operands: [cpu_rt, cpu_fs]
-    isFloat: true
-    readsRt: true
-    modifiesFs: true
-
-  # OP rt, cop1cs
-
-  - name: cfc1
-    index: 0x02
-    mnemonic: "Move Control Word from Floating-Point"
-    operands: [cpu_rt, cpu_cop1cs]
-    isFloat: true
-    modifiesRt: true
-
-  - name: ctc1
-    index: 0x06
-    mnemonic: "Move Control Word to Floating-Point"
-    operands: [cpu_rt, cpu_cop1cs]
-    isFloat: true
-    readsRt: true
-
-
-- class: cop1_bc1
-  data:
-
-  # OP IMM
-
-  - name: bc1f
-    index: 0x00
-    operands: [cpu_branch_target_label]
-    isBranch: true
-
-  - name: bc1t
-    index: 0x01
-    operands: [cpu_branch_target_label]
-    isBranch: true
-
-  - name: bc1fl
-    index: 0x02
-    operands: [cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-
-  - name: bc1tl
-    index: 0x03
-    operands: [cpu_branch_target_label]
-    isBranch: true
-    isBranchLikely: true
-
-
-- class: cop1_fpu_s
-  data:
-
+instruction_sets:
+- set: core
+  classes:
+  - instructions:
+    - name: INVALID
+      operands: [core_rs, core_rt, core_immediate]
+
+  - class: normal
+    instructions:
+
+    # OP LABEL
+
+    - name: j
+      index: 0x02
+      mnemonic: "Jump"
+      operands: [core_label]
+      isJump: true
+      isJumpWithAddress: true
+
+    - name: jal
+      index: 0x03
+      mnemonic: "Jump And Link"
+      operands: [core_label]
+      isJump: true
+      isJumpWithAddress: true
+      doesLink: true
+
+    # OP rs, rt, IMM
+
+    - name: beq
+      index: 0x04
+      mnemonic: "Branch on EQual"
+      operands: [core_rs, core_rt, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+      readsRt: true
+
+    - name: bne
+      index: 0x05
+      mnemonic: "Branch on Not Equal"
+      operands: [core_rs, core_rt, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+      readsRt: true
+
+    - name: beql
+      index: 0x14
+      mnemonic: "Branch on EQual Likely"
+      operands: [core_rs, core_rt, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+      readsRt: true
+
+    - name: bnel
+      index: 0x15
+      mnemonic: "Branch on Not Equal Likely"
+      operands: [core_rs, core_rt, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+      readsRt: true
+
+    # OP rs, IMM
+
+    - name: blez
+      index: 0x06
+      mnemonic: "Branch on Less than or Equal to Zero"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+
+    - name: blezl
+      index: 0x16
+      mnemonic: "Branch on Less than or Equal to Zero Likely"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+
+    - name: bgtz
+      index: 0x07
+      mnemonic: "Branch on Greater Than Zero"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+
+    - name: bgtzl
+      index: 0x17
+      mnemonic: "Branch on Greater Than Zero Likely"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+
+    # OP rt, rs, IMM
+
+    - name: addi
+      index: 0x08
+      mnemonic: "Add Immediate"
+      operands: [core_rt, core_rs, core_immediate]
+      modifiesRt: true
+      readsRs: true
+      notEmitedByCompilers: true
+      canBeLo: true
+
+    - name: addiu
+      index: 0x09
+      mnemonic: "Add Immediate Unsigned Word"
+      operands: [core_rt, core_rs, core_immediate]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+
+    - name: slti
+      index: 0x0A
+      mnemonic: "Set on Less Than Immediate"
+      operands: [core_rt, core_rs, core_immediate]
+      modifiesRt: true
+      readsRs: true
+
+    - name: sltiu
+      index: 0x0B
+      mnemonic: "Set on Less Than Immediate Unsigned"
+      operands: [core_rt, core_rs, core_immediate]
+      modifiesRt: true
+      readsRs: true
+
+    - name: andi
+      index: 0x0C
+      mnemonic: "And Immediate"
+      operands: [core_rt, core_rs, core_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      readsRs: true
+
+    - name: ori
+      index: 0x0D
+      mnemonic: "Or Immediate"
+      operands: [core_rt, core_rs, core_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+
+    - name: xori
+      index: 0x0E
+      mnemonic: "eXclusive OR Immediate"
+      operands: [core_rt, core_rs, core_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      readsRs: true
+
+    - name: daddi
+      index: 0x18
+      mnemonic: "Doubleword add Immediate"
+      operands: [core_rt, core_rs, core_immediate]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+
+    - name: daddiu
+      index: 0x19
+      mnemonic: "Doubleword add Immediate Unsigned"
+      operands: [core_rt, core_rs, core_immediate]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+
+    # OP rt, IMM
+
+    - name: lui
+      index: 0x0F
+      mnemonic: "Load Upper Immediate"
+      operands: [core_rt, core_immediate]
+      isUnsigned: true
+      modifiesRt: true
+      canBeHi: true
+
+    # OP rt, IMM(base)
+
+    - name: ldl
+      index: 0x1A
+      mnemonic: "Load Doubleword Left"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: ldr
+      index: 0x1B
+      mnemonic: "Load Doubleword Right"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: lb
+      index: 0x20
+      mnemonic: "Load Byte"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: BYTE
+
+    - name: lh
+      index: 0x21
+      mnemonic: "Load Halfword"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: SHORT
+
+    - name: lwl
+      index: 0x22
+      mnemonic: "Load Word Left"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: lw
+      index: 0x23
+      mnemonic: "Load Word"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: WORD
+
+    - name: lbu
+      index: 0x24
+      mnemonic: "Load Byte Insigned"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: BYTE
+      doesUnsignedMemoryAccess: true
+
+    - name: lhu
+      index: 0x25
+      mnemonic: "Load Halfword Unsigned"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: SHORT
+      doesUnsignedMemoryAccess: true
+
+    - name: lwr
+      index: 0x26
+      mnemonic: "Load Word Right"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: lwu
+      index: 0x27
+      mnemonic: "Load Word Unsigned"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: WORD
+      doesUnsignedMemoryAccess: true
+
+    - name: sb
+      index: 0x28
+      mnemonic: "Store Byte"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: BYTE
+
+    - name: sh
+      index: 0x29
+      mnemonic: "Store Halfword"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: SHORT
+
+    - name: swl
+      index: 0x2A
+      mnemonic: "Store Word Left"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+    - name: sw
+      index: 0x2B
+      mnemonic: "Store Word"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: WORD
+
+    - name: sdl
+      index: 0x2C
+      mnemonic: "Store Doubleword Left"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+    - name: sdr
+      index: 0x2D
+      mnemonic: "Store Doubleword Right"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+    - name: swr
+      index: 0x2E
+      mnemonic: "Store Word Right"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+    - name: ll
+      index: 0x30
+      mnemonic: "Load Linked word"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: pref
+      index: 0x33
+      mnemonic: "Prefetch"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+
+    - name: lld
+      index: 0x34
+      mnemonic: "Load Linked Doubleword"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: ld
+      index: 0x37
+      mnemonic: "Load Doubleword"
+      operands: [core_rt, core_immediate_base]
+      modifiesRt: true
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: DOUBLEWORD
+
+    - name: sc
+      index: 0x38
+      mnemonic: "Store Conditional word"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+    - name: scd
+      index: 0x3C
+      mnemonic: "Store Conditional Doubleword"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+    - name: sd
+      index: 0x3F
+      mnemonic: "Store Doubleword"
+      operands: [core_rt, core_immediate_base]
+      readsRs: true
+      readsRt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: DOUBLEWORD
+
+    # OP op, IMM(base)
+
+    - name: cache
+      index: 0x2F
+      mnemonic: "Cache"
+      operands: [core_op, core_immediate_base]
+      readsRs: true
+      notEmitedByCompilers: true
+
+    # OP ft, IMM(base)
+
+    - name: lwc1
+      index: 0x31
+      mnemonic: "Load Word to Coprocessor z"
+      operands: [core_ft, core_immediate_base]
+      isFloat: true
+      readsRs: true
+      modifiesFt: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: FLOAT
+
+    - name: ldc1
+      index: 0x35
+      mnemonic: "Load Doubleword to Coprocessor z"
+      operands: [core_ft, core_immediate_base]
+      isFloat: true
+      isDouble: true
+      readsRs: true
+      modifiesFt: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+      accessType: DOUBLEFLOAT
+
+    - name: swc1
+      index: 0x39
+      mnemonic: "Store Word from Coprocessor z"
+      operands: [core_ft, core_immediate_base]
+      isFloat: true
+      readsRs: true
+      readsFt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: FLOAT
+
+    - name: sdc1
+      index: 0x3D
+      mnemonic: "Store Doubleword from Coprocessor z"
+      operands: [core_ft, core_immediate_base]
+      isFloat: true
+      isDouble: true
+      readsRs: true
+      readsFt: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+      accessType: DOUBLEFLOAT
+
+    # OP cop2t, IMM(base)
+
+    - name: lwc2
+      index: 0x32
+      mnemonic: "Load Word to Coprocessor z"
+      operands: [core_cop2t, core_immediate_base]
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: ldc2
+      index: 0x36
+      mnemonic: "Load Doubleword to Coprocessor z"
+      operands: [core_cop2t, core_immediate_base]
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesLoad: true
+
+    - name: swc2
+      index: 0x3A
+      mnemonic: "Store Word from Coprocessor z"
+      operands: [core_cop2t, core_immediate_base]
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+    - name: sdc2
+      index: 0x3E
+      mnemonic: "Store Doubleword from Coprocessor z"
+      operands: [core_cop2t, core_immediate_base]
+      readsRs: true
+      canBeLo: true
+      doesDereference: true
+      doesStore: true
+
+
+    # Pseudo-Instruction Unique IDs
+
+    # OP IMM
+
+    - name: b
+      index: -0x03
+      mnemonic: "Branch (unconditional)"
+      operands: [core_branch_target_label]
+      isBranch: true
+      isPseudo: true
+
+    # OP rs, IMM
+
+    - name: beqz
+      index: -0x04
+      mnemonic: "Branch on EQual Zero"
+      operands: [core_rs, core_branch_target_label]
+      readsRs: true
+      isBranch: true
+      isPseudo: true
+
+    - name: bnez
+      index: -0x05
+      mnemonic: "Branch on Not Equal Zero"
+      operands: [core_rs, core_branch_target_label]
+      readsRs: true
+      isBranch: true
+      isPseudo: true
+
+
+  - class: special
+    instructions:
+
+    # OP rd, rt, sa
+
+    - name: sll
+      index: 0x00
+      mnemonic: "Shift word Left Logical"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: srl
+      index: 0x02
+      mnemonic: "Shift word Right Logical"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: sra
+      index: 0x03
+      mnemonic: "Shift word Right Arithmetic"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: dsll
+      index: 0x38
+      mnemonic: "Doubleword Shift Left Logical"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: dsrl
+      index: 0x3A
+      mnemonic: "Doubleword Shift Right Logical"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: dsra
+      index: 0x3B
+      mnemonic: "Doubleword Shift Right Arithmetic"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: dsll32
+      index: 0x3C
+      mnemonic: "Doubleword Shift Left Logical plus 32"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: dsrl32
+      index: 0x3E
+      mnemonic: "Doubleword Shift Right Logical plus 32"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    - name: dsra32
+      index: 0x3F
+      mnemonic: "Doubleword Shift Right Arithmetic plus 32"
+      operands: [core_rd, core_rt, core_sa]
+      modifiesRd: true
+      readsRt: true
+
+    # OP rd, rt, rs
+
+    - name: dsllv
+      index: 0x14
+      mnemonic: "Doubleword Shift Left Logical Variable"
+      operands: [core_rd, core_rt, core_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: dsrlv
+      index: 0x16
+      mnemonic: "Doubleword Shift Right Logical Variable"
+      operands: [core_rd, core_rt, core_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: dsrav
+      index: 0x17
+      mnemonic: "Doubleword Shift Right Arithmetic Variable"
+      operands: [core_rd, core_rt, core_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: sllv
+      index: 0x04
+      mnemonic: "Shift word Left Logical Variable"
+      operands: [core_rd, core_rt, core_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: srlv
+      index: 0x06
+      mnemonic: "Shift word Right Logical Variable"
+      operands: [core_rd, core_rt, core_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: srav
+      index: 0x07
+      mnemonic: "Shift word Right Arithmetic Variable"
+      operands: [core_rd, core_rt, core_rs]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    # OP rs
+
+    - name: mthi
+      index: 0x11
+      mnemonic: "Move To HI register"
+      operands: [core_rs]
+      readsRs: true
+      modifiesHI: true
+
+    - name: mtlo
+      index: 0x13
+      mnemonic: "Move To LO register"
+      operands: [core_rs]
+      readsRs: true
+      modifiesLO: true
+
+    - name: jr
+      index: 0x08
+      mnemonic: "Jump Register"
+      operands: [core_rs]
+      readsRs: true
+      isJump: true
+
+    - name: jalr
+      index: 0x09
+      mnemonic: "Jump And Link Register"
+      operands: [core_maybe_rd_rs]
+      isJump: true
+      modifiesRd: true
+      readsRs: true
+      doesLink: true
+
+    # OP rd
+
+    - name: mfhi
+      index: 0x10
+      mnemonic: "Move From HI register"
+      operands: [core_rd]
+      modifiesRd: true
+      readsHI: true
+
+    - name: mflo
+      index: 0x12
+      mnemonic: "Move From LO register"
+      operands: [core_rd]
+      modifiesRd: true
+      readsLO: true
+
+    # OP rd, rs, rt
+
+    - name: movz
+      index: 0x0A
+      mnemonic: "MOVe conditional on Zero"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: movn
+      index: 0x0B
+      mnemonic: "MOVe conditional on Not zero"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: div
+      index: 0x1A
+      mnemonic: "DIVide word"
+      operands: [core_rd, core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      readsRd: true
+      modifiesHI: true
+      modifiesLO: true
+
+    - name: divu
+      index: 0x1B
+      mnemonic: "DIVide Unsigned word"
+      operands: [core_rd, core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      readsRd: true
+      modifiesHI: true
+      modifiesLO: true
+
+    - name: sn64_div
+      index: -0x1A
+      mnemonic: "DIVide word"
+      operands: [core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      modifiesHI: true
+      modifiesLO: true
+
+    - name: sn64_divu
+      index: -0x1B
+      mnemonic: "DIVide Unsigned word"
+      operands: [core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      modifiesHI: true
+      modifiesLO: true
+
+
+    - name: ddiv
+      index: 0x1E
+      mnemonic: "Doubleword DIVide"
+      operands: [core_rd, core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      readsRd: true
+      modifiesHI: true
+      modifiesLO: true
+
+    - name: ddivu
+      index: 0x1F
+      mnemonic: "Doubleword DIVide Unsigned"
+      operands: [core_rd, core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      readsRd: true
+      modifiesHI: true
+      modifiesLO: true
+
+    # - name: ddiv
+    #   index: 
+    #   operands: [core_rs, core_rt]
+    #   readsRs: true
+    #   readsRt: true
+    #   modifiesHI: true
+    #   modifiesLO: true
+
+    # - name: ddivu
+    #   index: 
+    #   operands: [core_rs, core_rt]
+    #   readsRs: true
+    #   readsRt: true
+    #   modifiesHI: true
+    #   modifiesLO: true
+
+    - name: add
+      index: 0x20
+      mnemonic: "ADD word"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+      notEmitedByCompilers: true
+
+    - name: addu
+      index: 0x21
+      mnemonic: "ADD Unsigned word"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+      maybeIsMove: true
+
+    - name: sub
+      index: 0x22
+      mnemonic: "Subtract word"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: subu
+      index: 0x23
+      mnemonic: "SUBtract Unsigned word"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: and
+      index: 0x24
+      mnemonic: "AND"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: or
+      index: 0x25
+      mnemonic: "OR"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      maybeIsMove: true
+      readsRs: true
+      readsRt: true
+
+    - name: xor
+      index: 0x26
+      mnemonic: "eXclusive OR"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: nor
+      index: 0x27
+      mnemonic: "Not OR"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: slt
+      index: 0x2A
+      mnemonic: "Set on Less Than"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: sltu
+      index: 0x2B
+      mnemonic: "Set on Less Than Unsigned"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: dadd
+      index: 0x2C
+      mnemonic: "Doubleword Add"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: daddu
+      index: 0x2D
+      mnemonic: "Doubleword Add Unsigned"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+      maybeIsMove: true
+
+    - name: dsub
+      index: 0x2E
+      mnemonic: "Doubleword SUBtract"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    - name: dsubu
+      index: 0x2F
+      mnemonic: "Doubleword SUBtract Unsigned"
+      operands: [core_rd, core_rs, core_rt]
+      modifiesRd: true
+      readsRs: true
+      readsRt: true
+
+    # OP code
+
+    - name: syscall
+      index: 0x0C
+      mnemonic: "SYStem CALL"
+      operands: [core_code]
+
+    - name: break
+      index: 0x0D
+      mnemonic: "Break"
+      operands: [core_code]
+
+    - name: sync
+      index: 0x0F
+      mnemonic: "Sync"
+      operands: []
+
+    # OP rs, rt
+
+    - name: mult
+      index: 0x18
+      mnemonic: "MULTtiply word"
+      operands: [core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      modifiesHI: true
+      modifiesLO: true
+
+    - name: multu
+      index: 0x19
+      mnemonic: "MULTtiply Unsigned word"
+      operands: [core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      modifiesHI: true
+      modifiesLO: true
+
+    - name: dmult
+      index: 0x1C
+      mnemonic: "Doubleword MULTiply"
+      operands: [core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      modifiesHI: true
+      modifiesLO: true
+
+    - name: dmultu
+      index: 0x1D
+      mnemonic: "Doubleword MULTiply Unsigned"
+      operands: [core_rs, core_rt]
+      readsRs: true
+      readsRt: true
+      modifiesHI: true
+      modifiesLO: true
+
+
+    - name: tge
+      index: 0x30
+      mnemonic: "Trap if Greater or Equal"
+      operands: [core_rs, core_rt, core_code_lower]
+      readsRs: true
+      readsRt: true
+      isTrap: true
+
+    - name: tgeu
+      index: 0x31
+      mnemonic: "Trap if Greater or Equal Unsigned"
+      operands: [core_rs, core_rt, core_code_lower]
+      readsRs: true
+      readsRt: true
+      isTrap: true
+
+    - name: tlt
+      index: 0x32
+      mnemonic: "Trap if Less Than"
+      operands: [core_rs, core_rt, core_code_lower]
+      readsRs: true
+      readsRt: true
+      isTrap: true
+
+    - name: tltu
+      index: 0x33
+      mnemonic: "Trap if Less Than Unsigned"
+      operands: [core_rs, core_rt, core_code_lower]
+      readsRs: true
+      readsRt: true
+      isTrap: true
+
+    - name: teq
+      index: 0x34
+      mnemonic: "Trap if EQual"
+      operands: [core_rs, core_rt, core_code_lower]
+      readsRs: true
+      readsRt: true
+      isTrap: true
+
+    - name: tne
+      index: 0x36
+      mnemonic: "Trap if Not Equal"
+      operands: [core_rs, core_rt, core_code_lower]
+      readsRs: true
+      readsRt: true
+      isTrap: true
+
+
+    # Pseudo-Instruction Unique IDs
+
+    # OP
+
+    - name: nop
+      index: -0x01
+      mnemonic: "No OPeration"
+      operands: []
+      isPseudo: true
+
+    # OP rd, rs
+
+    - name: move
+      index: -0x25
+      mnemonic: "Move"
+      operands: [core_rd, core_rs]
+      modifiesRd: true
+      readsRs: true
+      maybeIsMove: true
+      isPseudo: true
+
+    - name: not
+      index: -0x27
+      mnemonic: "Not"
+      operands: [core_rd, core_rs]
+      modifiesRd: true
+      readsRs: true
+      isPseudo: true
+
+    # OP rd, rt
+
+    - name: negu
+      index: -0x23
+      operands: [core_rd, core_rt]
+      modifiesRd: true
+      readsRt: true
+      isPseudo: true
+
+
+  - class: regimm
+    instructions:
+
+    # OP rs, IMM
+
+    - name: bltz
+      index: 0x00
+      mnemonic: "Branch on Less Than Zero"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+
+    - name: bgez
+      index: 0x01
+      mnemonic: "Branch on Greater than or Equal to Zero"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+
+    - name: bltzl
+      index: 0x02
+      mnemonic: "Branch on Less Than Zero Likely"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+
+    - name: bgezl
+      index: 0x03
+      mnemonic: "Branch on Greater than or Equal to Zero Likely"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+
+
+    - name: tgei
+      index: 0x08
+      operands: [core_rs, core_immediate]
+      isTrap: true
+      readsRs: true
+
+    - name: tgeiu
+      index: 0x09
+      operands: [core_rs, core_immediate]
+      isTrap: true
+      readsRs: true
+
+    - name: tlti
+      index: 0x0A
+      operands: [core_rs, core_immediate]
+      isTrap: true
+      readsRs: true
+
+    - name: tltiu
+      index: 0x0B
+      operands: [core_rs, core_immediate]
+      isTrap: true
+      readsRs: true
+
+    - name: teqi
+      index: 0x0C
+      operands: [core_rs, core_immediate]
+      isTrap: true
+      readsRs: true
+
+    - name: tnei
+      index: 0x0E
+      operands: [core_rs, core_immediate]
+      isTrap: true
+      readsRs: true
+
+
+    - name: bltzal
+      index: 0x10
+      mnemonic: "Branch on Less Than Zero and Link"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+      doesLink: true
+
+    - name: bgezal
+      index: 0x11
+      mnemonic: "Branch on Greater Than or Equal to Zero and Link"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      readsRs: true
+      doesLink: true
+
+    - name: bltzall
+      index: 0x12
+      mnemonic: "Branch on Less Than Zero and Link Likely"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+      doesLink: true
+
+    - name: bgezall
+      index: 0x13
+      mnemonic: "Branch on Greater Than or Equal to Zero and Link Likely"
+      operands: [core_rs, core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+      readsRs: true
+      doesLink: true
+
+
+    # Pseudo-Instruction Unique IDs
+
+    - name: bal
+      index: -0x11
+      mnemonic: "Branch and Link"
+      operands: [core_branch_target_label]
+      isBranch: true
+      doesLink: true
+      isPseudo: true
+
+
+  - class: cop0
+    instructions:
+
+    # OP rt, cop0d
+
+    - name: mfc0
+      index: 0x00
+      mnemonic: "Move word From CP0"
+      operands: [core_rt, core_cop0d]
+      modifiesRt: true
+      notEmitedByCompilers: true
+
+    - name: dmfc0
+      index: 0x01
+      mnemonic: "Doubleword Move From CP0"
+      operands: [core_rt, core_cop0d]
+      modifiesRt: true
+
+    - name: cfc0
+      index: 0x02
+      mnemonic: "Move control word From CP0"
+      operands: [core_rt, core_cop0d]
+      modifiesRt: true
+
+    - name: mtc0
+      index: 0x04
+      mnemonic: "Move word to CP0"
+      operands: [core_rt, core_cop0d]
+      readsRt: true
+      notEmitedByCompilers: true
+
+    - name: dmtc0
+      index: 0x05
+      mnemonic: "Doubleword Move To CP0"
+      operands: [core_rt, core_cop0d]
+      readsRt: true
+
+    - name: ctc0
+      index: 0x06
+      mnemonic: "Move control word To CP0"
+      operands: [core_rt, core_cop0d]
+      readsRt: true
+
+
+  - class: cop0_bc0
+    instructions:
+
+    # OP IMM
+
+    - name: bc0f
+      index: 0x00
+      mnemonic: "Branch on FP False"
+      operands: [core_branch_target_label]
+      isBranch: true
+
+    - name: bc0t
+      index: 0x01
+      mnemonic: "Branch on FP True"
+      operands: [core_branch_target_label]
+      isBranch: true
+
+    - name: bc0fl
+      index: 0x02
+      mnemonic: "Branch on FP False Likely"
+      operands: [core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+
+    - name: bc0tl
+      index: 0x03
+      mnemonic: "Branch on FP True Likely"
+      operands: [core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+
+
+  - class: cop0_tlb
+    instructions:
+
+    # OP
+
+    - name: tlbr
+      index: 0x01
+      mnemonic: "Read Indexed TLB Entry"
+      operands: []
+      notEmitedByCompilers: true
+
+    - name: tlbwi
+      index: 0x02
+      mnemonic: "Write Indexed TLB Entry"
+      operands: []
+      notEmitedByCompilers: true
+
+    - name: tlbwr
+      index: 0x06
+      mnemonic: "Write Random TLB Entry"
+      operands: []
+
+    - name: tlbp
+      index: 0x08
+      mnemonic: "Probe TLB for Matching Entry"
+      operands: []
+      notEmitedByCompilers: true
+
+    - name: eret
+      index: 0x18
+      mnemonic: "Return from Exception"
+      operands: []
+      notEmitedByCompilers: true
+
+
+  - class: cop1
+    instructions:
+
+    # OP rt, fs
+
+    - name: mfc1
+      index: 0x00
+      mnemonic: "Move Word From Floating-Point"
+      operands: [core_rt, core_fs]
+      isFloat: true
+      modifiesRt: true
+      readsFs: true
+
+    - name: dmfc1
+      index: 0x01
+      mnemonic: "Doubleword Move From Floating-Point"
+      operands: [core_rt, core_fs]
+      isFloat: true
+      modifiesRt: true
+      readsFs: true
+
+    - name: mtc1
+      index: 0x04
+      mnemonic: "Move Word to Floating-Point"
+      operands: [core_rt, core_fs]
+      isFloat: true
+      readsRt: true
+      modifiesFs: true
+
+    - name: dmtc1
+      index: 0x05
+      mnemonic: "Doubleword Move To Floating-Point"
+      operands: [core_rt, core_fs]
+      isFloat: true
+      readsRt: true
+      modifiesFs: true
+
+    # OP rt, cop1cs
+
+    - name: cfc1
+      index: 0x02
+      mnemonic: "Move Control Word from Floating-Point"
+      operands: [core_rt, core_cop1cs]
+      isFloat: true
+      modifiesRt: true
+
+    - name: ctc1
+      index: 0x06
+      mnemonic: "Move Control Word to Floating-Point"
+      operands: [core_rt, core_cop1cs]
+      isFloat: true
+      readsRt: true
+
+
+  - class: cop1_bc1
+    instructions:
+
+    # OP IMM
+
+    - name: bc1f
+      index: 0x00
+      operands: [core_branch_target_label]
+      isBranch: true
+
+    - name: bc1t
+      index: 0x01
+      operands: [core_branch_target_label]
+      isBranch: true
+
+    - name: bc1fl
+      index: 0x02
+      operands: [core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+
+    - name: bc1tl
+      index: 0x03
+      operands: [core_branch_target_label]
+      isBranch: true
+      isBranchLikely: true
+
+
+  - class: cop1_fpu_s
+    instructions:
+
+      # OP fd, fs, ft
+
+    - name: add_s
+      index: 0x00
+      mnemonic: "Floating-Point Add"
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: sub_s
+      index: 0x01
+      mnemonic: "Floating-Point Sub"
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: mul_s
+      index: 0x02
+      mnemonic: "Floating-Point Multiply"
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: div_s
+      index: 0x03
+      mnemonic: "Floating-Point Divide"
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    # OP fd, fs
+
+    - name: sqrt_s
+      index: 0x04
+      mnemonic: "Floating-Point Square Root"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: abs_s
+      index: 0x05
+      mnemonic: "Floating-Point Absolute Value"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: mov_s
+      index: 0x06
+      mnemonic: "Floating-Point Move"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: neg_s
+      index: 0x07
+      mnemonic: "Floating-Point Negate"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: round_l_s
+      index: 0x08
+      mnemonic: "Floating-Point Round to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: trunc_l_s
+      index: 0x09
+      mnemonic: "Floating-Point Truncate to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: ceil_l_s
+      index: 0x0A
+      mnemonic: "Floating-Point Ceiling Convert to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: floor_l_s
+      index: 0x0B
+      mnemonic: "Floating-Point Floor Convert to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: round_w_s
+      index: 0x0C
+      mnemonic: "Floating-Point Round to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: trunc_w_s
+      index: 0x0D
+      mnemonic: "Floating-Point Truncate to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: ceil_w_s
+      index: 0x0E
+      mnemonic: "Floating-Point Ceiling Convert to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: floor_w_s
+      index: 0x0F
+      mnemonic: "Floating-Point Floor Convert to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    # OP fd, fs
+
+    - name: cvt_d_s
+      index: 0x21
+      operands: [core_fd, core_fs]
+      isFloat: true
+      isDouble: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: cvt_w_s
+      index: 0x24
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: cvt_l_s
+      index: 0x25
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    # OP fs, ft
+
+    - name: c_f_s
+      index: 0x30
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_un_s
+      index: 0x31
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_eq_s
+      index: 0x32
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ueq_s
+      index: 0x33
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_olt_s
+      index: 0x34
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ult_s
+      index: 0x35
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ole_s
+      index: 0x36
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ule_s
+      index: 0x37
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_sf_s
+      index: 0x38
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ngle_s
+      index: 0x39
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_seq_s
+      index: 0x3A
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ngl_s
+      index: 0x3B
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_lt_s
+      index: 0x3C
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_nge_s
+      index: 0x3D
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_le_s
+      index: 0x3E
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ngt_s
+      index: 0x3F
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+
+  - class: cop1_fpu_d
+    instructions:
+    
     # OP fd, fs, ft
 
-  - name: add_s
-    index: 0x00
-    mnemonic: "Floating-Point Add"
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  - name: sub_s
-    index: 0x01
-    mnemonic: "Floating-Point Sub"
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  - name: mul_s
-    index: 0x02
-    mnemonic: "Floating-Point Multiply"
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  - name: div_s
-    index: 0x03
-    mnemonic: "Floating-Point Divide"
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  # OP fd, fs
-
-  - name: sqrt_s
-    index: 0x04
-    mnemonic: "Floating-Point Square Root"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: abs_s
-    index: 0x05
-    mnemonic: "Floating-Point Absolute Value"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: mov_s
-    index: 0x06
-    mnemonic: "Floating-Point Move"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: neg_s
-    index: 0x07
-    mnemonic: "Floating-Point Negate"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: round_l_s
-    index: 0x08
-    mnemonic: "Floating-Point Round to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: trunc_l_s
-    index: 0x09
-    mnemonic: "Floating-Point Truncate to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: ceil_l_s
-    index: 0x0A
-    mnemonic: "Floating-Point Ceiling Convert to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: floor_l_s
-    index: 0x0B
-    mnemonic: "Floating-Point Floor Convert to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: round_w_s
-    index: 0x0C
-    mnemonic: "Floating-Point Round to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: trunc_w_s
-    index: 0x0D
-    mnemonic: "Floating-Point Truncate to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: ceil_w_s
-    index: 0x0E
-    mnemonic: "Floating-Point Ceiling Convert to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: floor_w_s
-    index: 0x0F
-    mnemonic: "Floating-Point Floor Convert to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  # OP fd, fs
-
-  - name: cvt_d_s
-    index: 0x21
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    isDouble: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: cvt_w_s
-    index: 0x24
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: cvt_l_s
-    index: 0x25
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  # OP fs, ft
-
-  - name: c_f_s
-    index: 0x30
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_un_s
-    index: 0x31
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_eq_s
-    index: 0x32
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ueq_s
-    index: 0x33
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_olt_s
-    index: 0x34
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ult_s
-    index: 0x35
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ole_s
-    index: 0x36
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ule_s
-    index: 0x37
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_sf_s
-    index: 0x38
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ngle_s
-    index: 0x39
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_seq_s
-    index: 0x3A
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ngl_s
-    index: 0x3B
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_lt_s
-    index: 0x3C
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_nge_s
-    index: 0x3D
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_le_s
-    index: 0x3E
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ngt_s
-    index: 0x3F
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-
-- class: cop1_fpu_d
-  data:
-  
-  # OP fd, fs, ft
-
-  - name: add_d
-    mnemonic: "Floating-Point Add"
-    index: 0x00
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  - name: sub_d
-    mnemonic: "Floating-Point Sub"
-    index: 0x01
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  - name: mul_d
-    mnemonic: "Floating-Point Multiply"
-    index: 0x02
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  - name: div_d
-    mnemonic: "Floating-Point Divide"
-    index: 0x03
-    operands: [cpu_fd, cpu_fs, cpu_ft]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-    readsFt: true
-
-  # OP fd, fs
-
-  - name: sqrt_d
-    index: 0x04
-    mnemonic: "Floating-Point Square Root"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: abs_d
-    index: 0x05
-    mnemonic: "Floating-Point Absolute Value"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: mov_d
-    index: 0x06
-    mnemonic: "Floating-Point Move"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: neg_d
-    index: 0x07
-    mnemonic: "Floating-Point Negate"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: round_l_d
-    index: 0x08
-    mnemonic: "Floating-Point Round to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: trunc_l_d
-    index: 0x09
-    mnemonic: "Floating-Point Truncate to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: ceil_l_d
-    index: 0x0A
-    mnemonic: "Floating-Point Ceiling Convert to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: floor_l_d
-    index: 0x0B
-    mnemonic: "Floating-Point Floor Convert to Long Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: round_w_d
-    index: 0x0C
-    mnemonic: "Floating-Point Round to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: trunc_w_d
-    index: 0x0D
-    mnemonic: "Floating-Point Truncate to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: ceil_w_d
-    index: 0x0E
-    mnemonic: "Floating-Point Ceiling Convert to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: floor_w_d
-    index: 0x0F
-    mnemonic: "Floating-Point Floor Convert to Word Fixed-Point"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  # OP fd, fs
-
-  - name: cvt_s_d
-    index: 0x20
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    isDouble: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: cvt_w_d
-    index: 0x24
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    isDouble: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: cvt_l_d
-    index: 0x25
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    isDouble: true
-    modifiesFd: true
-    readsFs: true
-
-  # OP fs, ft
-
-  - name: c_f_d
-    index: 0x30
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_un_d
-    index: 0x31
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_eq_d
-    index: 0x32
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ueq_d
-    index: 0x33
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_olt_d
-    index: 0x34
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ult_d
-    index: 0x35
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ole_d
-    index: 0x36
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ule_d
-    index: 0x37
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-
-  - name: c_df_d
-    index: 0x38
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ngle_d
-    index: 0x39
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_deq_d
-    index: 0x3A
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ngl_d
-    index: 0x3B
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_lt_d
-    index: 0x3C
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_nge_d
-    index: 0x3D
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_le_d
-    index: 0x3E
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-  - name: c_ngt_d
-    index: 0x3F
-    operands: [cpu_fs, cpu_ft]
-    isFloat: true
-    readsFs: true
-    readsFt: true
-
-
-- class: cop1_fpu_w
-  data:
-
-  # OP fd, fs
-
-  - name: cvt_s_w
-    index: 0x20
-    mnemonic: "Floating-Point Convert to Single Floating-Point (Word)"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: cvt_d_w
-    index: 0x21
-    mnemonic: "Floating-Point Convert to Double Floating-Point (Word)"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    isDouble: true
-    modifiesFd: true
-    readsFs: true
-
-- class: cop1_fpu_l
-  data:
-
-  # OP fd, fs
-
-  - name: cvt_s_l
-    index: 0x20
-    mnemonic: "Floating-Point Convert to Single Floating-Point (Longword)"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    modifiesFd: true
-    readsFs: true
-
-  - name: cvt_d_l
-    index: 0x21
-    mnemonic: "Floating-Point Convert to Double Floating-Point (Longword)"
-    operands: [cpu_fd, cpu_fs]
-    isFloat: true
-    isDouble: true
-    modifiesFd: true
-    readsFs: true
+    - name: add_d
+      mnemonic: "Floating-Point Add"
+      index: 0x00
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: sub_d
+      mnemonic: "Floating-Point Sub"
+      index: 0x01
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: mul_d
+      mnemonic: "Floating-Point Multiply"
+      index: 0x02
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    - name: div_d
+      mnemonic: "Floating-Point Divide"
+      index: 0x03
+      operands: [core_fd, core_fs, core_ft]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+      readsFt: true
+
+    # OP fd, fs
+
+    - name: sqrt_d
+      index: 0x04
+      mnemonic: "Floating-Point Square Root"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: abs_d
+      index: 0x05
+      mnemonic: "Floating-Point Absolute Value"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: mov_d
+      index: 0x06
+      mnemonic: "Floating-Point Move"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: neg_d
+      index: 0x07
+      mnemonic: "Floating-Point Negate"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: round_l_d
+      index: 0x08
+      mnemonic: "Floating-Point Round to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: trunc_l_d
+      index: 0x09
+      mnemonic: "Floating-Point Truncate to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: ceil_l_d
+      index: 0x0A
+      mnemonic: "Floating-Point Ceiling Convert to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: floor_l_d
+      index: 0x0B
+      mnemonic: "Floating-Point Floor Convert to Long Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: round_w_d
+      index: 0x0C
+      mnemonic: "Floating-Point Round to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: trunc_w_d
+      index: 0x0D
+      mnemonic: "Floating-Point Truncate to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: ceil_w_d
+      index: 0x0E
+      mnemonic: "Floating-Point Ceiling Convert to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: floor_w_d
+      index: 0x0F
+      mnemonic: "Floating-Point Floor Convert to Word Fixed-Point"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    # OP fd, fs
+
+    - name: cvt_s_d
+      index: 0x20
+      operands: [core_fd, core_fs]
+      isFloat: true
+      isDouble: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: cvt_w_d
+      index: 0x24
+      operands: [core_fd, core_fs]
+      isFloat: true
+      isDouble: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: cvt_l_d
+      index: 0x25
+      operands: [core_fd, core_fs]
+      isFloat: true
+      isDouble: true
+      modifiesFd: true
+      readsFs: true
+
+    # OP fs, ft
+
+    - name: c_f_d
+      index: 0x30
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_un_d
+      index: 0x31
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_eq_d
+      index: 0x32
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ueq_d
+      index: 0x33
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_olt_d
+      index: 0x34
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ult_d
+      index: 0x35
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ole_d
+      index: 0x36
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ule_d
+      index: 0x37
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+
+    - name: c_df_d
+      index: 0x38
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ngle_d
+      index: 0x39
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_deq_d
+      index: 0x3A
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ngl_d
+      index: 0x3B
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_lt_d
+      index: 0x3C
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_nge_d
+      index: 0x3D
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_le_d
+      index: 0x3E
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+    - name: c_ngt_d
+      index: 0x3F
+      operands: [core_fs, core_ft]
+      isFloat: true
+      readsFs: true
+      readsFt: true
+
+
+  - class: cop1_fpu_w
+    instructions:
+
+    # OP fd, fs
+
+    - name: cvt_s_w
+      index: 0x20
+      mnemonic: "Floating-Point Convert to Single Floating-Point (Word)"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: cvt_d_w
+      index: 0x21
+      mnemonic: "Floating-Point Convert to Double Floating-Point (Word)"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      isDouble: true
+      modifiesFd: true
+      readsFs: true
+
+  - class: cop1_fpu_l
+    instructions:
+
+    # OP fd, fs
+
+    - name: cvt_s_l
+      index: 0x20
+      mnemonic: "Floating-Point Convert to Single Floating-Point (Longword)"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      modifiesFd: true
+      readsFs: true
+
+    - name: cvt_d_l
+      index: 0x21
+      mnemonic: "Floating-Point Convert to Double Floating-Point (Longword)"
+      operands: [core_fd, core_fs]
+      isFloat: true
+      isDouble: true
+      modifiesFd: true
+      readsFs: true
+
+
+
+
+  - class: userdef
+    instructions:
+    - name: USERDEF_00
+      operands: []
+    - name: USERDEF_01
+      operands: []
+    - name: USERDEF_02
+      operands: []
+    - name: USERDEF_03
+      operands: []
+    - name: USERDEF_04
+      operands: []
+    - name: USERDEF_05
+      operands: []
+    - name: USERDEF_06
+      operands: []
+    - name: USERDEF_07
+      operands: []
+    - name: USERDEF_08
+      operands: []
+    - name: USERDEF_09
+      operands: []
+    - name: USERDEF_10
+      operands: []
+    - name: USERDEF_11
+      operands: []
+    - name: USERDEF_12
+      operands: []
+    - name: USERDEF_13
+      operands: []
+    - name: USERDEF_14
+      operands: []
+    - name: USERDEF_15
+      operands: []
+    - name: USERDEF_16
+      operands: []
+    - name: USERDEF_17
+      operands: []
+    - name: USERDEF_18
+      operands: []
+    - name: USERDEF_19
+      operands: []
+    - name: USERDEF_20
+      operands: []
+
+  - instructions:
+    - name: MAX
+      operands: []

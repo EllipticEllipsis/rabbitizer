@@ -1,0 +1,91 @@
+# SPDX-FileCopyrightText: © 2022 Decompollaborate
+# SPDX-License-Identifier: MIT
+
+
+#! @note: `index` can come from various parts of the instruction word, it is used for lookup in the appropriate table; 
+#! it is assumed that the code already knows which this is.
+
+instruction_sets:
+- set: rsp
+  classes:
+  - instructions:
+    - name: INVALID
+      operands: [rsp_vd, rsp_vs, rsp_vt_elementhigh]
+
+
+  # - class: rsp_cop2
+  #   instructions:
+
+  # - class: rsp_cop2_vu
+  #   instructions:
+
+
+  # - class: rsp_normal_lwc2
+  #   instructions:
+
+  # - class: rsp_normal_swc2
+  #   instructions:
+
+  # # CPU instructions but with rsp registers
+
+  # - class: rsp_normal
+  #   instructions:
+
+  # - class: rsp_special
+  #   instructions:
+
+  # - class: rsp_regimm
+  #   instructions:
+
+  # - class: rsp_cop0
+  #   instructions:
+
+
+  - class: user
+    instructions:
+    - name: USERDEF_00
+      operands: []
+    - name: USERDEF_01
+      operands: []
+    - name: USERDEF_02
+      operands: []
+    - name: USERDEF_03
+      operands: []
+    - name: USERDEF_04
+      operands: []
+    - name: USERDEF_05
+      operands: []
+    - name: USERDEF_06
+      operands: []
+    - name: USERDEF_07
+      operands: []
+    - name: USERDEF_08
+      operands: []
+    - name: USERDEF_09
+      operands: []
+    - name: USERDEF_10
+      operands: []
+    - name: USERDEF_11
+      operands: []
+    - name: USERDEF_12
+      operands: []
+    - name: USERDEF_13
+      operands: []
+    - name: USERDEF_14
+      operands: []
+    - name: USERDEF_15
+      operands: []
+    - name: USERDEF_16
+      operands: []
+    - name: USERDEF_17
+      operands: []
+    - name: USERDEF_18
+      operands: []
+    - name: USERDEF_19
+      operands: []
+    - name: USERDEF_20
+      operands: []
+
+  - instructions:
+    - name: MAX
+      operands: []
